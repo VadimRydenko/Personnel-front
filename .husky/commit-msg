@@ -1,0 +1,21 @@
+msgFile="$1"
+
+if [ -z "$msgFile" ] || [ ! -f "$msgFile" ]; then
+  echo "husky: commit-msg: no commit message file provided"
+  exit 1
+fi
+
+msg="$(cat "$msgFile")"
+# Trim leading/trailing whitespace and collapse newlines for length check
+trimmed="$(printf "%s" "$msg" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+len=${#trimmed}
+min=10
+
+if [ "$len" -lt "$min" ]; then
+  echo "Commit message too short ($len). Minimum is $min characters."
+  echo "Message: \"$trimmed\""
+  exit 1
+fi
+
+exit 0
