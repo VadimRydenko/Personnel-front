@@ -45,8 +45,8 @@ code {
 
 .app {
   min-height: 100svh;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .appHeader {
@@ -88,6 +88,7 @@ code {
 }
 
 .appMain {
+  flex: 1;
   padding: 26px 0 32px;
 }
 

@@ -1,35 +1,29 @@
 import { useQuery } from '@tanstack/react-query'
-
-function wait(ms: number) {
-  return new Promise<void>((resolve) => setTimeout(resolve, ms))
-}
-
-async function fetchHello() {
-  await wait(250)
-  return { message: 'Hello from React Query' }
-}
+import { healthCheck } from '../app/api'
 
 export function HomePage() {
-  const helloQuery = useQuery({
-    queryKey: ['hello'],
-    queryFn: fetchHello,
+  const healthQuery = useQuery({
+    queryKey: ['backend-health'],
+    queryFn: healthCheck,
+    retry: 1,
   })
 
   return (
     <section className="card">
       <h1>Home</h1>
-      <p className="muted">Готовий старт: маршрути, провайдери, лінт/формат.</p>
 
       <div className="divider" />
 
-      <h2>React Query demo</h2>
-      {helloQuery.isLoading ? (
+      <h2>Backend health</h2>
+      {healthQuery.isLoading ? (
         <p>Loading…</p>
-      ) : helloQuery.isError ? (
-        <p className="error">Failed to load demo data</p>
+      ) : healthQuery.isError ? (
+        <p className="error">Backend is not reachable</p>
       ) : (
         <p>
-          <code>{helloQuery.data?.message ?? 'OK'}</code>
+          <code>
+            Alive (HTTP {healthQuery.data?.status}) — {healthQuery.data?.url}
+          </code>
         </p>
       )}
     </section>
