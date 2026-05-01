@@ -13,7 +13,6 @@ export function HomePage() {
       <h1>Home</h1>
 
       <div className="divider" />
-
       <h2>Backend health</h2>
       {healthQuery.isLoading ? (
         <p>Loading…</p>

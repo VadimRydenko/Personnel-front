@@ -17,6 +17,7 @@ export function LoginPage() {
     e.preventDefault()
     setErrorText(null)
     setIsSubmitting(true)
+
     try {
       const { error } = await authClient.signIn.email({
         email: email.trim(),
@@ -25,6 +26,7 @@ export function LoginPage() {
 
       if (error) {
         setErrorText(error.message ?? 'Sign-in failed')
+
         return
       }
 
@@ -71,4 +73,3 @@ export function LoginPage() {
     </section>
   )
 }
-
