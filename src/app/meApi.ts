@@ -23,6 +23,8 @@ export type MeResponse = {
   email: string
   name: string | null
   mustChangePassword: boolean
+  /** ISO-8601: остання зміна пароля (для політики 180 днів), якщо бекенд повертає */
+  passwordChangedAt?: string | null
   roles: MeRole[]
   groups: MeGroup[]
   directPermissions: MePermission[]
