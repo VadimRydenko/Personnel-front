@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { AppLayout } from '../components/AppLayout'
-import { MustChangePasswordRedirect } from '../components/MustChangePasswordRedirect'
+import { AuthRoot } from '../components/AuthRoot'
 import { RequireAuth } from '../components/RequireAuth'
 import { AboutPage } from '../pages/AboutPage'
 import { AdminUsersPage } from '../pages/AdminUsersPage'
@@ -11,18 +10,14 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 
 export const appRouter = createBrowserRouter([
   {
-    element: (
-      <>
-        <MustChangePasswordRedirect />
-        <AppLayout />
-      </>
-    ),
+    path: '/',
+    element: <AuthRoot />,
     children: [
-      { path: '/', element: <HomePage /> },
-      { path: '/login', element: <LoginPage /> },
-      { path: '/about', element: <AboutPage /> },
+      { path: 'login', element: <LoginPage /> },
+      { index: true, element: <HomePage /> },
+      { path: 'about', element: <AboutPage /> },
       {
-        path: '/change-password',
+        path: 'change-password',
         element: (
           <RequireAuth>
             <ChangePasswordPage />
@@ -30,7 +25,7 @@ export const appRouter = createBrowserRouter([
         ),
       },
       {
-        path: '/admin/users',
+        path: 'admin/users',
         element: (
           <RequireAuth adminOnly>
             <AdminUsersPage />

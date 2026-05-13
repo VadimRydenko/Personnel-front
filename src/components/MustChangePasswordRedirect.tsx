@@ -1,8 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useSession } from '../app/authClient'
+import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { useMe } from '../hooks/useMe'
-
-const SECURITY_ADMIN = 'SECURITY_ADMIN'
 
 type SessionUser = {
   mustChangePassword?: boolean | undefined
@@ -28,9 +27,7 @@ export function MustChangePasswordRedirect() {
     return null
   }
 
-  const isSecurityAdmin = (me.data?.roles ?? []).some((r) => r.roleName === SECURITY_ADMIN)
-
-  if (isSecurityAdmin) {
+  if (hasSecurityAdminRole(me.data)) {
     return null
   }
 

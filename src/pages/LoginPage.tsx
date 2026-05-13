@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { authClient, useSession } from '../app/authClient'
 import { fetchMe } from '../app/meApi'
 import { queryClient } from '../app/queryClient'
-
-const SECURITY_ADMIN = 'SECURITY_ADMIN'
+import { hasSecurityAdminRole } from '../app/securityAdmin'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -49,9 +48,7 @@ export function LoginPage() {
       }
 
       void queryClient.setQueryData(['me', meData.id], meData)
-      const isSecurityAdmin = meData.roles.some((r) => r.roleName === SECURITY_ADMIN)
-
-      navigate(isSecurityAdmin ? '/admin/users' : '/', { replace: true })
+      navigate(hasSecurityAdminRole(meData) ? '/admin/users' : '/', { replace: true })
     } catch (err) {
       setErrorText(err instanceof Error ? err.message : 'Не вдалося увійти')
     } finally {

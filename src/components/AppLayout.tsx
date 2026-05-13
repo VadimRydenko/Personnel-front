@@ -1,14 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { authClient, useSession } from '../app/authClient'
+import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { queryClient } from '../app/queryClient'
 import { useMe } from '../hooks/useMe'
-
-const SECURITY_ADMIN = 'SECURITY_ADMIN'
 
 export function AppLayout() {
   const session = useSession()
   const me = useMe()
-  const isSecurityAdmin = Boolean(me.data?.roles.some((r) => r.roleName === SECURITY_ADMIN))
+  const showAdminNav =
+    Boolean(session.data?.user) && me.isSuccess && hasSecurityAdminRole(me.data)
 
   return (
     <div className="app">
@@ -19,13 +19,10 @@ export function AppLayout() {
             <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : undefined)}>
               Home
             </NavLink>
-            <NavLink to="/login" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-              Login
-            </NavLink>
             <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : undefined)}>
               About
             </NavLink>
-            {session.data?.user && isSecurityAdmin ? (
+            {showAdminNav ? (
               <NavLink to="/admin/users" className={({ isActive }) => (isActive ? 'active' : undefined)}>
                 Admin
               </NavLink>
@@ -35,9 +32,9 @@ export function AppLayout() {
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
             {session.isPending ? (
               <small className="muted">auth…</small>
-            ) : session.data?.user ? (
+            ) : (
               <>
-                <small className="muted">{session.data.user.email ?? session.data.user.name}</small>
+                <small className="muted">{session.data?.user.email ?? session.data?.user.name}</small>
                 <button
                   onClick={async () => {
                     await authClient.signOut()
@@ -48,8 +45,6 @@ export function AppLayout() {
                   Sign out
                 </button>
               </>
-            ) : (
-              <small className="muted">guest</small>
             )}
           </div>
         </div>

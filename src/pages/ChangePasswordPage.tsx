@@ -1,16 +1,15 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authClient, useSession } from '../app/authClient'
+import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { queryClient } from '../app/queryClient'
 import { useMe } from '../hooks/useMe'
-
-const SECURITY_ADMIN = 'SECURITY_ADMIN'
 
 export function ChangePasswordPage() {
   const navigate = useNavigate()
   const session = useSession()
   const me = useMe()
-  const isSecurityAdmin = (me.data?.roles ?? []).some((r) => r.roleName === SECURITY_ADMIN)
+  const isSecurityAdmin = hasSecurityAdminRole(me.data)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')

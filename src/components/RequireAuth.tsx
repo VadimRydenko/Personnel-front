@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useSession } from '../app/authClient'
+import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { useMe } from '../hooks/useMe'
-
-const SECURITY_ADMIN = 'SECURITY_ADMIN'
 
 export function RequireAuth(props: { children: ReactNode; adminOnly?: boolean | undefined }) {
   const session = useSession()
@@ -23,13 +22,7 @@ export function RequireAuth(props: { children: ReactNode; adminOnly?: boolean | 
       return <p className="muted">Завантаження профілю…</p>
     }
 
-    if (me.isError) {
-      return <p className="error">Немає доступу до адміністрування.</p>
-    }
-
-    const isAdmin = me.data?.roles.some((r) => r.roleName === SECURITY_ADMIN) ?? false
-
-    if (!isAdmin) {
+    if (me.isError || !hasSecurityAdminRole(me.data)) {
       return <Navigate to="/" replace />
     }
   }
