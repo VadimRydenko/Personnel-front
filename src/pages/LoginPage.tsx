@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authClient, useSession } from '../app/authClient'
+import { fetchMe } from '../app/meApi'
+import { queryClient } from '../app/queryClient'
+
+const SECURITY_ADMIN = 'SECURITY_ADMIN'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -8,7 +12,6 @@ export function LoginPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorText, setErrorText] = useState<string | null>(null)
 
@@ -21,30 +24,36 @@ export function LoginPage() {
 
     try {
       const trimmedEmail = email.trim()
-      const result =
-        mode === 'sign-up'
-          ? await authClient.signUp.email({
-              email: trimmedEmail,
-              password,
-              name: trimmedEmail.split('@')[0] ?? 'User',
-            })
-          : await authClient.signIn.email({
-              email: trimmedEmail,
-              password,
-            })
+      const result = await authClient.signIn.email({
+        email: trimmedEmail,
+        password,
+      })
 
       if (result.error) {
-        setErrorText(result.error.message ?? (mode === 'sign-up' ? 'Sign-up failed' : 'Sign-in failed'))
+        setErrorText(result.error.message ?? 'Не вдалося увійти')
 
         return
       }
 
       await session.refetch()
-      navigate('/')
+
+      let meData: Awaited<ReturnType<typeof fetchMe>>
+
+      try {
+        meData = await fetchMe()
+      } catch {
+        void queryClient.invalidateQueries({ queryKey: ['me'] })
+        navigate('/', { replace: true })
+
+        return
+      }
+
+      void queryClient.setQueryData(['me', meData.id], meData)
+      const isSecurityAdmin = meData.roles.some((r) => r.roleName === SECURITY_ADMIN)
+
+      navigate(isSecurityAdmin ? '/admin/users' : '/', { replace: true })
     } catch (err) {
-      setErrorText(
-        err instanceof Error ? err.message : mode === 'sign-up' ? 'Sign-up failed' : 'Sign-in failed',
-      )
+      setErrorText(err instanceof Error ? err.message : 'Не вдалося увійти')
     } finally {
       setIsSubmitting(false)
     }
@@ -52,40 +61,19 @@ export function LoginPage() {
 
   return (
     <section className="card">
-      <h1>{mode === 'sign-up' ? 'Create account' : 'Login'}</h1>
+      <h1>Вхід</h1>
+      <p className="muted">Нові облікові записи створює адміністратор безпеки.</p>
 
       <div className="divider" />
 
-      <form
-        onSubmit={onSubmit}
-        style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 420 }}
-      >
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => setMode('sign-in')}
-            disabled={isSubmitting}
-            aria-pressed={mode === 'sign-in'}
-          >
-            Sign in
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('sign-up')}
-            disabled={isSubmitting}
-            aria-pressed={mode === 'sign-up'}
-          >
-            Sign up
-          </button>
-        </div>
-
+      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 420 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span>Email</span>
           <input value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
         </label>
 
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span>Password</span>
+          <span>Пароль</span>
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -97,7 +85,7 @@ export function LoginPage() {
         {errorText ? <p className="error">{errorText}</p> : null}
 
         <button type="submit" disabled={!canSubmit || isSubmitting}>
-          {isSubmitting ? (mode === 'sign-up' ? 'Creating…' : 'Signing in…') : mode === 'sign-up' ? 'Create' : 'Sign in'}
+          {isSubmitting ? 'Вхід…' : 'Увійти'}
         </button>
       </form>
     </section>

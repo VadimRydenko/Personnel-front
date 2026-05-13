@@ -1,8 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { authClient, useSession } from '../app/authClient'
+import { queryClient } from '../app/queryClient'
+import { useMe } from '../hooks/useMe'
+
+const SECURITY_ADMIN = 'SECURITY_ADMIN'
 
 export function AppLayout() {
   const session = useSession()
+  const me = useMe()
+  const isSecurityAdmin = Boolean(me.data?.roles.some((r) => r.roleName === SECURITY_ADMIN))
 
   return (
     <div className="app">
@@ -19,6 +25,11 @@ export function AppLayout() {
             <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : undefined)}>
               About
             </NavLink>
+            {session.data?.user && isSecurityAdmin ? (
+              <NavLink to="/admin/users" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+                Admin
+              </NavLink>
+            ) : null}
           </nav>
 
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -30,6 +41,7 @@ export function AppLayout() {
                 <button
                   onClick={async () => {
                     await authClient.signOut()
+                    void queryClient.invalidateQueries({ queryKey: ['me'] })
                     await session.refetch()
                   }}
                 >
