@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { authClient, useSession } from '../app/authClient'
 import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { queryClient } from '../app/queryClient'
@@ -7,8 +7,10 @@ import { useMe } from '../hooks/useMe'
 export function AppLayout() {
   const session = useSession()
   const me = useMe()
+  const location = useLocation()
   const showAdminNav =
     Boolean(session.data?.user) && me.isSuccess && hasSecurityAdminRole(me.data)
+  const adminNavActive = location.pathname.startsWith('/admin/users')
 
   return (
     <div className="app">
@@ -23,7 +25,10 @@ export function AppLayout() {
               About
             </NavLink>
             {showAdminNav ? (
-              <NavLink to="/admin/users" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+              <NavLink
+                to="/admin/users/directory"
+                className={() => (adminNavActive ? 'active' : undefined)}
+              >
                 Admin
               </NavLink>
             ) : null}

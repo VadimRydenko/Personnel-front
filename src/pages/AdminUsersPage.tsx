@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
+import { NavLink } from 'react-router-dom'
 import { createManagedUser, fetchAdminCatalog } from '../app/meApi'
 import { queryClient } from '../app/queryClient'
 
@@ -56,6 +57,15 @@ export function AdminUsersPage() {
 
   return (
     <section className="card">
+      <nav style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
+        <NavLink to="/admin/users/directory" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+          Користувачі
+        </NavLink>
+        <NavLink to="/admin/users" end className={({ isActive }) => (isActive ? 'active' : undefined)}>
+          Створити
+        </NavLink>
+      </nav>
+
       <h1>Створення облікового запису</h1>
       <p className="muted">
         Призначте ролі, групи та прямі повноваження. Система згенерує тимчасовий пароль і встановить обов’язкову зміну пароля

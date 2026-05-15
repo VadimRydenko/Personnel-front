@@ -128,3 +128,92 @@ code {
 .error {
   color: #fecaca;
 }
+
+/* Admin user directory — результати пошуку (рядки, не «білі кнопки») */
+.userDirectoryResults {
+  max-height: min(520px, 58vh);
+  overflow-y: auto;
+  padding: 4px 6px 4px 2px;
+  margin: 0 -2px;
+}
+
+.userDirectoryList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.userDirectoryRow {
+  width: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.28);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.userDirectoryRow:hover {
+  border-color: rgba(124, 58, 237, 0.45);
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.userDirectoryRow:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.userDirectoryRow--selected {
+  border-color: rgba(124, 58, 237, 0.85);
+  background: rgba(124, 58, 237, 0.16);
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.2);
+}
+
+.userDirectoryRow--blocked {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.userDirectoryRow--blocked:hover {
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.userDirectoryRow--blocked.userDirectoryRow--selected {
+  border-color: rgba(248, 113, 113, 0.65);
+  background: rgba(248, 113, 113, 0.14);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.18);
+}
+
+.userDirectoryRowMeta {
+  display: block;
+  font-size: 0.8em;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.userDirectoryRowBadge {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fecaca;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(248, 113, 113, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
