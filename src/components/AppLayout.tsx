@@ -1,3 +1,4 @@
+import { LogOut, Search, Shield } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { authClient, useSession } from '../app/authClient'
 import { getInitials } from '../app/displayName'
@@ -5,7 +6,7 @@ import { mainNavItems } from '../app/navItems'
 import { queryClient } from '../app/queryClient'
 import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { useMe } from '../hooks/useMe'
-import { NavIcon } from './NavIcon'
+import { navIconProps } from './iconDefaults'
 
 export function AppLayout() {
   const session = useSession()
@@ -32,29 +33,30 @@ export function AppLayout() {
           </div>
           <label className="sidebarSearch">
             <span className="visuallyHidden">Пошук</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" strokeLinecap="round" />
-            </svg>
+            <Search size={16} strokeWidth={2} aria-hidden />
             <input type="search" placeholder="Пошук…" disabled />
           </label>
         </div>
 
         <nav className="sidebarNav">
-          {mainNavItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) => `sidebarNavLink${isActive ? ' sidebarNavLink--active' : ''}`}
-            >
-              <span className="sidebarNavIcon">
-                <NavIcon name={item.icon} />
-              </span>
-              <span className="sidebarNavLabel">{item.label}</span>
-              {item.badge != null ? <span className="sidebarNavBadge">{item.badge}</span> : null}
-            </NavLink>
-          ))}
+          {mainNavItems.map((item) => {
+            const Icon = item.icon
+
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) => `sidebarNavLink${isActive ? ' sidebarNavLink--active' : ''}`}
+              >
+                <span className="sidebarNavIcon">
+                  <Icon {...navIconProps} />
+                </span>
+                <span className="sidebarNavLabel">{item.label}</span>
+                {item.badge != null ? <span className="sidebarNavBadge">{item.badge}</span> : null}
+              </NavLink>
+            )
+          })}
           {showAdminNav ? (
             <NavLink
               to="/admin/users/directory"
@@ -63,7 +65,7 @@ export function AppLayout() {
               }
             >
               <span className="sidebarNavIcon">
-                <NavIcon name="directories" />
+                <Shield {...navIconProps} />
               </span>
               <span className="sidebarNavLabel">Адміністрування</span>
             </NavLink>
@@ -90,10 +92,7 @@ export function AppLayout() {
               await session.refetch()
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" />
-              <path d="M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <LogOut size={18} strokeWidth={1.75} aria-hidden />
             <span className="visuallyHidden">Вийти</span>
           </button>
         </div>
