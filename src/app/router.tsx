@@ -1,13 +1,19 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { AuthRoot } from '../components/AuthRoot'
 import { RequireAuth } from '../components/RequireAuth'
-import { AboutPage } from '../pages/AboutPage'
+import { placeholderTitles } from './navItems'
 import { AdminUserDirectoryPage } from '../pages/AdminUserDirectoryPage'
 import { AdminUsersPage } from '../pages/AdminUsersPage'
 import { ChangePasswordPage } from '../pages/ChangePasswordPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
+import { PlaceholderPage } from '../pages/PlaceholderPage'
+
+const placeholderRoutes = Object.entries(placeholderTitles).map(([path, title]) => ({
+  path: path.slice(1),
+  element: <PlaceholderPage title={title} />,
+}))
 
 export const appRouter = createBrowserRouter([
   {
@@ -16,7 +22,7 @@ export const appRouter = createBrowserRouter([
     children: [
       { path: 'login', element: <LoginPage /> },
       { index: true, element: <HomePage /> },
-      { path: 'about', element: <AboutPage /> },
+      ...placeholderRoutes,
       {
         path: 'change-password',
         element: (

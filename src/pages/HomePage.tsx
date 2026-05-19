@@ -1,30 +1,24 @@
-import { useQuery } from '@tanstack/react-query'
-import { healthCheck } from '../app/api'
+import { useSession } from '../app/authClient'
+import { getDisplayFirstName } from '../app/displayName'
+import { useMe } from '../hooks/useMe'
 
 export function HomePage() {
-  const healthQuery = useQuery({
-    queryKey: ['backend-health'],
-    queryFn: healthCheck,
-    retry: 1,
-  })
+  const session = useSession()
+  const me = useMe()
+  const user = session.data?.user
+  const firstName = user
+    ? getDisplayFirstName(me.data?.name ?? user.name, user.email)
+    : 'колега'
 
   return (
-    <section className="card">
-      <h1>Home</h1>
-
-      <div className="divider" />
-      <h2>Backend health</h2>
-      {healthQuery.isLoading ? (
-        <p>Loading…</p>
-      ) : healthQuery.isError ? (
-        <p className="error">Backend is not reachable</p>
-      ) : (
-        <p>
-          <code>
-            Alive (HTTP {healthQuery.data?.status}) — {healthQuery.data?.url}
-          </code>
-        </p>
-      )}
-    </section>
+    <div className="pageContent">
+      <h1 className="homeGreeting">Доброго ранку, {firstName} 👋</h1>
+      <div className="homeGrid" aria-hidden>
+        <div className="homeTile" />
+        <div className="homeTile" />
+        <div className="homeTile" />
+        <div className="homeTile" />
+      </div>
+    </div>
   )
 }

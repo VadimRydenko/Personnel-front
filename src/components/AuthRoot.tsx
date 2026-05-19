@@ -11,10 +11,8 @@ export function AuthRoot() {
 
   if (session.isPending) {
     return (
-      <div className="app">
-        <main className="container appMain">
-          <p className="muted">Завантаження…</p>
-        </main>
+      <div className="guestShell">
+        <p className="muted">Завантаження…</p>
       </div>
     )
   }

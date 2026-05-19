@@ -57,34 +57,47 @@ export function LoginPage() {
   }
 
   return (
-    <section className="card">
-      <h1>Вхід</h1>
-      <p className="muted">Нові облікові записи створює адміністратор безпеки.</p>
+    <div className="loginPage">
+      <div className="loginBrand">
+        <span className="loginBrandName">Штат</span>
+        <span className="loginBrandMeta">Система управління персоналом</span>
+      </div>
 
-      <div className="divider" />
+      <section className="loginCard card">
+        <h1 className="loginTitle">Вхід</h1>
+        <p className="muted loginSubtitle">Нові облікові записи створює адміністратор безпеки.</p>
 
-      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 420 }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span>Email</span>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-        </label>
+        <form className="loginForm" onSubmit={onSubmit}>
+          <label className="field">
+            <span className="fieldLabel">Email</span>
+            <input
+              className="fieldInput"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              placeholder="name@example.com"
+            />
+          </label>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span>Пароль</span>
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            autoComplete="current-password"
-          />
-        </label>
+          <label className="field">
+            <span className="fieldLabel">Пароль</span>
+            <input
+              className="fieldInput"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+            />
+          </label>
 
-        {errorText ? <p className="error">{errorText}</p> : null}
+          {errorText ? <p className="error">{errorText}</p> : null}
 
-        <button type="submit" disabled={!canSubmit || isSubmitting}>
-          {isSubmitting ? 'Вхід…' : 'Увійти'}
-        </button>
-      </form>
-    </section>
+          <button type="submit" className="btn btnPrimary" disabled={!canSubmit || isSubmitting}>
+            {isSubmitting ? 'Вхід…' : 'Увійти'}
+          </button>
+        </form>
+      </section>
+    </div>
   )
 }
