@@ -13,7 +13,7 @@ export function HomePage() {
   return (
     <div className="pageContent">
       <h1 className="homeGreeting">Доброго ранку, {firstName} 👋</h1>
-      <div className="homeGrid" aria-hidden>
+      <div className="homeTiles" aria-hidden>
         <div className="homeTile" />
         <div className="homeTile" />
         <div className="homeTile" />

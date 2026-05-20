@@ -225,7 +225,7 @@ export function AdminUserDirectoryPage() {
 
       {list.isError ? <p className="error">{(list.error as Error).message}</p> : null}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.2fr)', gap: 24 }}>
+      <div className="userDirectorySplit">
         <div>
           {list.isPending ? (
             <p className="muted">Завантаження…</p>
@@ -268,7 +268,7 @@ export function AdminUserDirectoryPage() {
                 </ul>
               </div>
               {list.data && list.data.total > list.data.pageSize ? (
-                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <div className="userDirectoryPager">
                   <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
                     Назад
                   </button>

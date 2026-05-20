@@ -1,3 +1,5 @@
+@import 'tailwindcss';
+
 :root {
   color-scheme: light;
   --sidebar-bg: #1b2133;
@@ -18,12 +20,18 @@
   --error: #dc2626;
   --error-bg: #fef2f2;
 
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 16px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
   --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.04);
 
-  font: 16px/1.5 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font:
+    16px/1.5 'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   background: var(--main-bg);
   color: var(--text);
   font-synthesis: none;
@@ -95,15 +103,21 @@ code {
 .sidebarTop {
   display: flex;
   flex-direction: column;
-  gap: 14px;
   margin-bottom: 8px;
+}
+
+.sidebarTop > * + * {
+  margin-top: 14px;
 }
 
 .sidebarBrand {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   padding: 0 8px;
+}
+
+.sidebarBrand > * + * {
+  margin-top: 2px;
 }
 
 .sidebarBrandName {
@@ -120,7 +134,6 @@ code {
 .sidebarSearch {
   display: flex;
   align-items: center;
-  gap: 8px;
   padding: 0 12px;
   height: 38px;
   border-radius: var(--radius-sm);
@@ -142,24 +155,32 @@ code {
   color: var(--sidebar-muted);
 }
 
+.sidebarSearch > * + * {
+  margin-left: 8px;
+}
+
 .sidebarNav {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
   overflow-y: auto;
   padding: 8px 0;
   margin: 0 -4px;
 }
 
+.sidebarNav > * + * {
+  margin-top: 2px;
+}
+
 .sidebarNavLink {
   display: flex;
   align-items: center;
-  gap: 10px;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
   color: var(--sidebar-muted);
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .sidebarNavLink:hover {
@@ -178,6 +199,7 @@ code {
   justify-content: center;
   flex-shrink: 0;
   opacity: 0.9;
+  margin-right: 10px;
 }
 
 .sidebarNavLabel {
@@ -203,7 +225,6 @@ code {
 .sidebarFooter {
   display: flex;
   align-items: center;
-  gap: 8px;
   padding-top: 12px;
   border-top: 1px solid var(--sidebar-border);
   margin-top: 4px;
@@ -214,7 +235,14 @@ code {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+}
+
+.sidebarFooter > * + * {
+  margin-left: 8px;
+}
+
+.sidebarUser > * + * {
+  margin-left: 10px;
 }
 
 .sidebarAvatar {
@@ -235,7 +263,10 @@ code {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+}
+
+.sidebarUserText > * + * {
+  margin-top: 1px;
 }
 
 .sidebarUserName {
@@ -266,7 +297,9 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .sidebarLogout:hover {
@@ -277,12 +310,19 @@ code {
 .mainShell {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   background: var(--main-bg);
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .pageContent {
   padding: 28px 32px 40px;
+}
+
+.pageContent.pageContent--flush {
+  padding: 0;
 }
 
 .pageTitle {
@@ -301,15 +341,17 @@ code {
   color: var(--text);
 }
 
-.homeGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+.homeTiles {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -10px;
   min-height: calc(100svh - 160px);
 }
 
 .homeTile {
+  flex: 1 1 calc(50% - 20px);
   min-height: 220px;
+  margin: 10px;
   background: var(--surface);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
@@ -331,14 +373,20 @@ code {
   width: min(420px, 100%);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+}
+
+.loginPage > * + * {
+  margin-top: 24px;
 }
 
 .loginBrand {
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+}
+
+.loginBrand > * + * {
+  margin-top: 4px;
 }
 
 .loginBrandName {
@@ -372,7 +420,10 @@ code {
 .loginForm {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+}
+
+.loginForm > * + * {
+  margin-top: 16px;
 }
 
 /* ——— Shared UI ——— */
@@ -421,7 +472,10 @@ code {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+}
+
+.field > * + * {
+  margin-top: 6px;
 }
 
 .fieldLabel {
@@ -441,7 +495,9 @@ code {
   background: #fff;
   color: var(--text);
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .fieldInput:focus,
@@ -456,13 +512,19 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   padding: 10px 16px;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.btn > * + * {
+  margin-left: 8px;
 }
 
 .btn:disabled {
@@ -491,7 +553,10 @@ code {
   border: 1px solid var(--surface-border);
 }
 
-.card button:not(.btnPrimary):not([type='submit']):not(.userDirectoryRow):not(.sidebarLogout):hover:not(:disabled) {
+.card
+  button:not(.btnPrimary):not([type='submit']):not(.userDirectoryRow):not(.sidebarLogout):hover:not(
+    :disabled
+  ) {
   background: #f8fafc;
 }
 
@@ -527,7 +592,39 @@ code {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+}
+
+.userDirectoryList > * + * {
+  margin-top: 10px;
+}
+
+.userDirectorySplit {
+  display: flex;
+  align-items: flex-start;
+}
+
+.userDirectorySplit > * {
+  min-width: 0;
+}
+
+.userDirectorySplit > *:first-child {
+  flex: 1 1 0;
+  margin-right: 24px;
+}
+
+.userDirectorySplit > *:last-child {
+  flex: 1.2 1 0;
+}
+
+.userDirectoryPager {
+  display: flex;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.userDirectoryPager > * + * {
+  margin-left: 8px;
 }
 
 .userDirectoryRow {
@@ -618,8 +715,20 @@ code {
     overflow-x: auto;
   }
 
-  .homeGrid {
-    grid-template-columns: 1fr;
+  .homeTiles {
     min-height: auto;
+  }
+
+  .homeTile {
+    flex-basis: 100%;
+  }
+
+  .userDirectorySplit {
+    flex-direction: column;
+  }
+
+  .userDirectorySplit > *:first-child {
+    margin-right: 0;
+    margin-bottom: 24px;
   }
 }

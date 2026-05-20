@@ -9,6 +9,7 @@ import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
+import { OrgStructurePage } from '../pages/OrgStructurePage'
 
 const placeholderRoutes = Object.entries(placeholderTitles).map(([path, title]) => ({
   path: path.slice(1),
@@ -22,6 +23,7 @@ export const appRouter = createBrowserRouter([
     children: [
       { path: 'login', element: <LoginPage /> },
       { index: true, element: <HomePage /> },
+      { path: 'staffing', element: <OrgStructurePage /> },
       ...placeholderRoutes,
       {
         path: 'change-password',
