@@ -3,6 +3,7 @@ import { useSession } from '../app/authClient'
 import { AppLayout } from './AppLayout'
 import { GuestLayout } from './GuestLayout'
 import { MustChangePasswordRedirect } from './MustChangePasswordRedirect'
+import { Muted } from './ui'
 
 export function AuthRoot() {
   const session = useSession()
@@ -11,8 +12,8 @@ export function AuthRoot() {
 
   if (session.isPending) {
     return (
-      <div className="guestShell">
-        <p className="muted">Завантаження…</p>
+      <div className="flex min-h-svh items-center justify-center bg-main p-6">
+        <Muted>Завантаження…</Muted>
       </div>
     )
   }

@@ -117,7 +117,10 @@ export async function fetchMe(): Promise<MeResponse> {
 
   if (!res.ok) {
     const message =
-      typeof body === 'object' && body !== null && 'message' in body && typeof (body as { message: unknown }).message === 'string'
+      typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      typeof (body as { message: unknown }).message === 'string'
         ? (body as { message: string }).message
         : `Request failed (${res.status})`
 
@@ -133,7 +136,10 @@ export async function fetchAdminCatalog(): Promise<AdminCatalogResponse> {
 
   if (!res.ok) {
     const message =
-      typeof body === 'object' && body !== null && 'message' in body && typeof (body as { message: unknown }).message === 'string'
+      typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      typeof (body as { message: unknown }).message === 'string'
         ? (body as { message: string }).message
         : `Request failed (${res.status})`
 
@@ -143,7 +149,9 @@ export async function fetchAdminCatalog(): Promise<AdminCatalogResponse> {
   return body as AdminCatalogResponse
 }
 
-export async function createManagedUser(payload: CreateManagedUserPayload): Promise<CreateManagedUserResponse> {
+export async function createManagedUser(
+  payload: CreateManagedUserPayload,
+): Promise<CreateManagedUserResponse> {
   const res = await fetch(`${getApiBaseUrl()}/api/admin/users`, {
     method: 'POST',
     credentials: 'include',
@@ -154,7 +162,10 @@ export async function createManagedUser(payload: CreateManagedUserPayload): Prom
 
   if (!res.ok) {
     const message =
-      typeof body === 'object' && body !== null && 'message' in body && typeof (body as { message: unknown }).message === 'string'
+      typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      typeof (body as { message: unknown }).message === 'string'
         ? (body as { message: string }).message
         : `Request failed (${res.status})`
 
@@ -184,7 +195,10 @@ export async function searchAdminUsers(params: {
 
   if (!res.ok) {
     const message =
-      typeof body === 'object' && body !== null && 'message' in body && typeof (body as { message: unknown }).message === 'string'
+      typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      typeof (body as { message: unknown }).message === 'string'
         ? (body as { message: string }).message
         : `Request failed (${res.status})`
 
@@ -195,12 +209,17 @@ export async function searchAdminUsers(params: {
 }
 
 export async function getAdminUser(id: string): Promise<AdminUserDetail> {
-  const res = await fetch(`${getApiBaseUrl()}/api/admin/users/${encodeURIComponent(id)}`, { credentials: 'include' })
+  const res = await fetch(`${getApiBaseUrl()}/api/admin/users/${encodeURIComponent(id)}`, {
+    credentials: 'include',
+  })
   const body = await readJson(res)
 
   if (!res.ok) {
     const message =
-      typeof body === 'object' && body !== null && 'message' in body && typeof (body as { message: unknown }).message === 'string'
+      typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      typeof (body as { message: unknown }).message === 'string'
         ? (body as { message: string }).message
         : `Request failed (${res.status})`
 
@@ -210,7 +229,10 @@ export async function getAdminUser(id: string): Promise<AdminUserDetail> {
   return body as AdminUserDetail
 }
 
-export async function patchAdminUser(id: string, payload: PatchAdminUserPayload): Promise<AdminUserDetail> {
+export async function patchAdminUser(
+  id: string,
+  payload: PatchAdminUserPayload,
+): Promise<AdminUserDetail> {
   const res = await fetch(`${getApiBaseUrl()}/api/admin/users/${encodeURIComponent(id)}`, {
     method: 'PATCH',
     credentials: 'include',
@@ -221,7 +243,10 @@ export async function patchAdminUser(id: string, payload: PatchAdminUserPayload)
 
   if (!res.ok) {
     const message =
-      typeof body === 'object' && body !== null && 'message' in body && typeof (body as { message: unknown }).message === 'string'
+      typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      typeof (body as { message: unknown }).message === 'string'
         ? (body as { message: string }).message
         : `Request failed (${res.status})`
 
@@ -232,15 +257,21 @@ export async function patchAdminUser(id: string, payload: PatchAdminUserPayload)
 }
 
 export async function resetAdminUserPassword(id: string): Promise<ResetAdminUserPasswordResponse> {
-  const res = await fetch(`${getApiBaseUrl()}/api/admin/users/${encodeURIComponent(id)}/reset-password`, {
-    method: 'POST',
-    credentials: 'include',
-  })
+  const res = await fetch(
+    `${getApiBaseUrl()}/api/admin/users/${encodeURIComponent(id)}/reset-password`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    },
+  )
   const body = await readJson(res)
 
   if (!res.ok) {
     const message =
-      typeof body === 'object' && body !== null && 'message' in body && typeof (body as { message: unknown }).message === 'string'
+      typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      typeof (body as { message: unknown }).message === 'string'
         ? (body as { message: string }).message
         : `Request failed (${res.status})`
 

@@ -4,6 +4,16 @@ import { authClient, useSession } from '../app/authClient'
 import { fetchMe } from '../app/meApi'
 import { queryClient } from '../app/queryClient'
 import { hasSecurityAdminRole } from '../app/securityAdmin'
+import {
+  Button,
+  Card,
+  CardTitle,
+  ErrorAlert,
+  Field,
+  FieldInput,
+  FieldLabel,
+  Muted,
+} from '../components/ui'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -57,47 +67,45 @@ export function LoginPage() {
   }
 
   return (
-    <div className="loginPage">
-      <div className="loginBrand">
-        <span className="loginBrandName">Штат</span>
-        <span className="loginBrandMeta">Система управління персоналом</span>
+    <div className="flex w-full max-w-[420px] flex-col gap-6">
+      <div className="flex flex-col gap-1 text-center">
+        <span className="text-[1.75rem] font-bold tracking-[-0.02em] text-sidebar">Штат</span>
+        <span className="text-sm text-muted">Система управління персоналом</span>
       </div>
 
-      <section className="loginCard card">
-        <h1 className="loginTitle">Вхід</h1>
-        <p className="muted loginSubtitle">Нові облікові записи створює адміністратор безпеки.</p>
+      <Card className="px-7 pb-8 pt-7">
+        <CardTitle>Вхід</CardTitle>
+        <Muted className="mb-5 text-sm">Нові облікові записи створює адміністратор безпеки.</Muted>
 
-        <form className="loginForm" onSubmit={onSubmit}>
-          <label className="field">
-            <span className="fieldLabel">Email</span>
-            <input
-              className="fieldInput"
+        <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+          <Field>
+            <FieldLabel>Email</FieldLabel>
+            <FieldInput
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               placeholder="name@example.com"
             />
-          </label>
+          </Field>
 
-          <label className="field">
-            <span className="fieldLabel">Пароль</span>
-            <input
-              className="fieldInput"
+          <Field>
+            <FieldLabel>Пароль</FieldLabel>
+            <FieldInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               autoComplete="current-password"
               placeholder="••••••••"
             />
-          </label>
+          </Field>
 
-          {errorText ? <p className="error">{errorText}</p> : null}
+          {errorText ? <ErrorAlert>{errorText}</ErrorAlert> : null}
 
-          <button type="submit" className="btn btnPrimary" disabled={!canSubmit || isSubmitting}>
+          <Button type="submit" disabled={!canSubmit || isSubmitting}>
             {isSubmitting ? 'Вхід…' : 'Увійти'}
-          </button>
+          </Button>
         </form>
-      </section>
+      </Card>
     </div>
   )
 }

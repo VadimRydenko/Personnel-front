@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
-import { NavLink, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import {
   fetchAdminCatalog,
   getAdminUser,
@@ -10,7 +10,27 @@ import {
   type AdminCatalogResponse,
   type AdminUserDetail,
 } from '../app/meApi'
+import {
+  AdminSubNav,
+  Button,
+  Card,
+  CardTitle,
+  Divider,
+  ErrorAlert,
+  FieldInput,
+  Muted,
+  PageContent,
+} from '../components/ui'
+import { cn } from '../lib/cn'
 import { useMe } from '../hooks/useMe'
+
+const userDirectoryRowClass = (selected: boolean, blocked: boolean) =>
+  cn(
+    'w-full cursor-pointer rounded-sm border border-border bg-slate-50 px-3.5 py-3 text-left text-ink transition-[border-color,background,box-shadow] hover:border-accent/45 hover:bg-accent/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+    selected && 'border-accent/75 bg-accent/10 shadow-[0_0_0_1px_rgba(59,130,246,0.15)]',
+    blocked && 'border-error/35 bg-error/[0.05] hover:border-error/50 hover:bg-error/[0.08]',
+    blocked && selected && 'border-error/60 bg-error/10 shadow-[0_0_0_1px_rgba(220,38,38,0.12)]',
+  )
 
 type UserEditPanelProps = {
   user: AdminUserDetail
@@ -53,7 +73,7 @@ function UserEditPanel(props: UserEditPanelProps) {
       patchAdminUser(user.id, {
         roleIds,
         blocked,
-        blockReason: blocked ? (blockReason.trim() || null) : null,
+        blockReason: blocked ? blockReason.trim() || null : null,
       }),
     onSuccess: async () => {
       setResetResult(null)
@@ -73,19 +93,23 @@ function UserEditPanel(props: UserEditPanelProps) {
 
   return (
     <>
-      <h2 style={{ marginTop: 0 }}>{user.email}</h2>
-      <p className="muted">
+      <h2 className="mt-0 text-lg font-semibold text-ink">{user.email}</h2>
+      <Muted>
         ID: <code>{user.id}</code>
-      </p>
+      </Muted>
 
       <fieldset style={{ marginTop: 16 }}>
         <legend>Ролі</legend>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {rolesCatalog.map((r) => (
             <label key={r.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input type="checkbox" checked={roleIds.includes(r.id)} onChange={() => roleToggle(r.id)} />
+              <input
+                type="checkbox"
+                checked={roleIds.includes(r.id)}
+                onChange={() => roleToggle(r.id)}
+              />
               <span>
-                {r.roleName} <small className="muted">{r.notes ?? ''}</small>
+                {r.roleName} <small className="text-muted">{r.notes ?? ''}</small>
               </span>
             </label>
           ))}
@@ -109,18 +133,21 @@ function UserEditPanel(props: UserEditPanelProps) {
         </label>
       </fieldset>
 
-      {patchMutation.isError ? <p className="error">{(patchMutation.error as Error).message}</p> : null}
+      {patchMutation.isError ? (
+        <ErrorAlert>{(patchMutation.error as Error).message}</ErrorAlert>
+      ) : null}
 
-      <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button
           type="button"
           disabled={detailUnchanged || roleIds.length === 0 || patchMutation.isPending}
           onClick={() => patchMutation.mutate()}
         >
           {patchMutation.isPending ? 'Збереження…' : 'Зберегти зміни'}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="secondary"
           disabled={resetMutation.isPending || user.blocked}
           onClick={() => {
             setResetResult(null)
@@ -128,13 +155,15 @@ function UserEditPanel(props: UserEditPanelProps) {
           }}
         >
           {resetMutation.isPending ? 'Скидання…' : 'Скинути пароль'}
-        </button>
+        </Button>
       </div>
 
-      {resetMutation.isError ? <p className="error">{(resetMutation.error as Error).message}</p> : null}
+      {resetMutation.isError ? (
+        <ErrorAlert>{(resetMutation.error as Error).message}</ErrorAlert>
+      ) : null}
 
       {resetResult ? (
-        <div style={{ marginTop: 16, padding: 12, border: '1px solid #ccc', borderRadius: 8 }}>
+        <div className="mt-4 rounded-sm border border-border p-3">
           <p>
             <strong>Новий тимчасовий пароль</strong> (покажіть лише один раз):
           </p>
@@ -168,7 +197,10 @@ export function AdminUserDirectoryPage() {
     enabled: Boolean(selectedId),
   })
 
-  const isSelf = useMemo(() => Boolean(me.data?.id && selectedId && me.data.id === selectedId), [me.data?.id, selectedId])
+  const isSelf = useMemo(
+    () => Boolean(me.data?.id && selectedId && me.data.id === selectedId),
+    [me.data?.id, selectedId],
+  )
 
   const invalidateList = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['admin-users'] })
@@ -188,125 +220,122 @@ export function AdminUserDirectoryPage() {
   }
 
   return (
-    <section className="card">
-      <nav style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
-        <NavLink to="/admin/users/directory" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-          Користувачі
-        </NavLink>
-        <NavLink to="/admin/users" end className={({ isActive }) => (isActive ? 'active' : undefined)}>
-          Створити
-        </NavLink>
-      </nav>
+    <PageContent>
+      <Card>
+        <AdminSubNav />
 
-      <h1>Користувачі</h1>
-      <p className="muted">Пошук за email або ім’ям, зміна ролей, блокування та скидання пароля.</p>
+        <CardTitle>Користувачі</CardTitle>
+        <Muted>Пошук за email або ім’ям, зміна ролей, блокування та скидання пароля.</Muted>
 
-      <div className="divider" />
+        <Divider />
 
-      <form onSubmit={onSearch} style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-        <input
-          value={qInput}
-          onChange={(e) => setQInput(e.target.value)}
-          placeholder="Пошук…"
-          style={{ flex: '1 1 200px' }}
-        />
-        <button type="submit">Шукати</button>
-        <button
-          type="button"
-          onClick={() => {
-            setQInput('')
-            setQ('')
-            setPage(1)
-          }}
-        >
-          Скинути
-        </button>
-      </form>
+        <form className="mb-4 flex flex-wrap gap-2" onSubmit={onSearch}>
+          <FieldInput
+            value={qInput}
+            onChange={(e) => setQInput(e.target.value)}
+            placeholder="Пошук…"
+            className="min-w-[200px] flex-[1_1_200px]"
+          />
+          <Button type="submit">Шукати</Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setQInput('')
+              setQ('')
+              setPage(1)
+            }}
+          >
+            Скинути
+          </Button>
+        </form>
 
-      {list.isError ? <p className="error">{(list.error as Error).message}</p> : null}
+        {list.isError ? <ErrorAlert>{(list.error as Error).message}</ErrorAlert> : null}
 
-      <div className="userDirectorySplit">
-        <div>
-          {list.isPending ? (
-            <p className="muted">Завантаження…</p>
-          ) : (
-            <>
-              <p className="muted" style={{ marginTop: 0 }}>
-                Знайдено: {list.data?.total ?? 0}
-              </p>
-              <div className="userDirectoryResults">
-                <ul className="userDirectoryList">
-                  {(list.data?.items ?? []).map((u) => {
-                    const selected = selectedId === u.id
+        <div className="flex items-start max-[900px]:flex-col">
+          <div className="min-w-0 flex-[1_1_0] max-[900px]:mb-6 max-[900px]:mr-0 mr-6">
+            {list.isPending ? (
+              <Muted>Завантаження…</Muted>
+            ) : (
+              <>
+                <Muted className="mt-0">Знайдено: {list.data?.total ?? 0}</Muted>
+                <div className="-mx-0.5 max-h-[min(520px,58vh)] overflow-y-auto px-0.5 py-1">
+                  <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+                    {(list.data?.items ?? []).map((u) => {
+                      const selected = selectedId === u.id
 
-                    return (
-                      <li key={u.id}>
-                        <button
-                          type="button"
-                          onClick={() => selectUser(u.id)}
-                          className={[
-                            'userDirectoryRow',
-                            selected ? 'userDirectoryRow--selected' : '',
-                            u.blocked ? 'userDirectoryRow--blocked' : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                        >
-                          <strong>{u.email}</strong>
-                          {u.name ? (
-                            <span className="muted">
-                              {' '}
-                              · {u.name}
+                      return (
+                        <li key={u.id}>
+                          <button
+                            type="button"
+                            onClick={() => selectUser(u.id)}
+                            className={userDirectoryRowClass(selected, u.blocked)}
+                          >
+                            <strong>{u.email}</strong>
+                            {u.name ? <span className="text-muted"> · {u.name}</span> : null}
+                            {u.blocked ? (
+                              <span className="mt-1.5 inline-block rounded-md border border-red-200 bg-error-surface px-2 py-0.5 text-[0.75em] font-semibold uppercase tracking-wide text-error">
+                                Заблоковано
+                              </span>
+                            ) : null}
+                            <span className="mt-1 block text-[0.8em] text-muted">
+                              {u.roles.map((r) => r.roleName).join(', ') || '—'}
                             </span>
-                          ) : null}
-                          {u.blocked ? <span className="userDirectoryRowBadge">Заблоковано</span> : null}
-                          <span className="userDirectoryRowMeta">{u.roles.map((r) => r.roleName).join(', ') || '—'}</span>
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-              {list.data && list.data.total > list.data.pageSize ? (
-                <div className="userDirectoryPager">
-                  <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                    Назад
-                  </button>
-                  <span className="muted">
-                    Стор. {page} / {Math.ceil(list.data.total / list.data.pageSize)}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={page * list.data.pageSize >= list.data.total}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
-                    Далі
-                  </button>
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
                 </div>
-              ) : null}
-            </>
-          )}
-        </div>
+                {list.data && list.data.total > list.data.pageSize ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={page <= 1}
+                      onClick={() => setPage((p) => p - 1)}
+                    >
+                      Назад
+                    </Button>
+                    <Muted>
+                      Стор. {page} / {Math.ceil(list.data.total / list.data.pageSize)}
+                    </Muted>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={page * list.data.pageSize >= list.data.total}
+                      onClick={() => setPage((p) => p + 1)}
+                    >
+                      Далі
+                    </Button>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
 
-        <div>
-          {!selectedId ? (
-            <p className="muted">Оберіть користувача зі списку.</p>
-          ) : detail.isPending ? (
-            <p className="muted">Завантаження профілю…</p>
-          ) : detail.isError ? (
-            <p className="error">{(detail.error as Error).message}</p>
-          ) : isSelf ? (
-            <p className="error">Неможливо редагувати власний обліковий запис у цьому інтерфейсі.</p>
-          ) : catalog.isSuccess && detail.data ? (
-            <UserEditPanel
-              key={`${detail.data.id}-${detail.data.updatedAt}`}
-              user={detail.data}
-              rolesCatalog={catalog.data.roles}
-              onInvalidateList={invalidateList}
-            />
-          ) : null}
+          <div className="min-w-0 flex-[1.2_1_0]">
+            {!selectedId ? (
+              <Muted>Оберіть користувача зі списку.</Muted>
+            ) : detail.isPending ? (
+              <Muted>Завантаження профілю…</Muted>
+            ) : detail.isError ? (
+              <ErrorAlert>{(detail.error as Error).message}</ErrorAlert>
+            ) : isSelf ? (
+              <ErrorAlert>
+                Неможливо редагувати власний обліковий запис у цьому інтерфейсі.
+              </ErrorAlert>
+            ) : catalog.isSuccess && detail.data ? (
+              <UserEditPanel
+                key={`${detail.data.id}-${detail.data.updatedAt}`}
+                user={detail.data}
+                rolesCatalog={catalog.data.roles}
+                onInvalidateList={invalidateList}
+              />
+            ) : null}
+          </div>
         </div>
-      </div>
-    </section>
+      </Card>
+    </PageContent>
   )
 }

@@ -1,32 +1,52 @@
-# React starter kit (Vite + TS)
+# Personnel (frontend)
 
-- React Router
+React SPA для системи «Штат»: авторизація, штатний розпис, адміністрування користувачів.
+
+## Стек
+
+- Vite + React 19 + TypeScript
+- React Router 7
 - TanStack React Query
-- ESLint + Prettier
-- Приклад структури сторінок/лейаута
+- Tailwind CSS v4 (`@theme` токени в `src/index.css`)
+- better-auth, Lucide icons
+- ESLint + Prettier + Husky
 
 ## Швидкий старт
 
 ```bash
 npm install
+cp .env.example .env.local   # VITE_API_BASE_URL
 npm run dev
 ```
 
 ## Команди
 
-- `npm run dev` — dev server
-- `npm run build` — production build
-- `npm run preview` — preview build
-- `npm run lint` — eslint (0 warnings allowed)
-- `npm run format` / `npm run format:check` — prettier
-- `npm run typecheck` — TypeScript build check
+| Команда                           | Опис                |
+| --------------------------------- | ------------------- |
+| `npm run dev`                     | Dev server          |
+| `npm run build`                   | Production build    |
+| `npm run preview`                 | Preview build       |
+| `npm run lint`                    | ESLint (0 warnings) |
+| `npm run typecheck`               | `tsc -b`            |
+| `npm run format` / `format:check` | Prettier            |
 
-## ENV
+## Стилі
 
-Скопіюй `.env.example` в `.env.local` і підстав значення під себе.
+- **Токени дизайну** — `@theme` у `src/index.css` (`bg-main`, `text-ink`, `bg-sidebar`, `border-border`, …).
+- **UI-примітиви** — `src/components/ui/` (`Button`, `Card`, `Field`, `Muted`, …).
+- **`cn()`** — `src/lib/cn.ts` (clsx + tailwind-merge).
 
 ## Структура
 
-- `src/app/` — router + провайдери
-- `src/pages/` — сторінки
-- `src/components/` — компоненти
+```
+src/
+  app/           # router, API, auth, query client
+  components/    # AppLayout, ui/
+  lib/           # cn()
+  pages/         # сторінки (OrgStructurePage/ — feature-модуль)
+  hooks/
+```
+
+## ENV
+
+`VITE_API_BASE_URL` — базовий URL бекенду (див. `.env.example`).

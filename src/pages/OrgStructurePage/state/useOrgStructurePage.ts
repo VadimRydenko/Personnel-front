@@ -9,7 +9,13 @@ import {
   type UnitType,
 } from '../../../app/orgStructureApi'
 import { queryClient } from '../../../app/queryClient'
-import { buildTree, expandAllExpandable, getBreadcrumbs, matchesQuery } from './tree'
+import {
+  expandAllExpandable,
+  flattenOrgTree,
+  getBreadcrumbs,
+  matchesQuery,
+  normalizeOrgTree,
+} from './tree'
 
 const dateInputValue = (d: Date) => {
   const yyyy = d.getFullYear()
@@ -48,7 +54,10 @@ export const useOrgStructurePage = () => {
     enabled: selectedCode != null,
   })
 
-  const tree = useMemo(() => buildTree(unitsQuery.data?.items ?? []), [unitsQuery.data?.items])
+  const tree = useMemo(
+    () => normalizeOrgTree(unitsQuery.data?.items ?? []),
+    [unitsQuery.data?.items],
+  )
 
   const visibleRoots = useMemo(() => {
     if (!normalizedQuery) return tree.roots
@@ -63,7 +72,7 @@ export const useOrgStructurePage = () => {
   }, [selectedCode, tree.byCode])
 
   const parents = useMemo(() => {
-    const items = unitsQuery.data?.items ?? []
+    const items = flattenOrgTree(unitsQuery.data?.items ?? [])
 
     return [...items].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'uk'))
   }, [unitsQuery.data?.items])
@@ -114,7 +123,8 @@ export const useOrgStructurePage = () => {
       })
       setSelectedCode(created.code)
     },
-    onError: (e) => setCreateErrorText(e instanceof Error ? e.message : 'Не вдалося створити підрозділ'),
+    onError: (e) =>
+      setCreateErrorText(e instanceof Error ? e.message : 'Не вдалося створити підрозділ'),
   })
 
   const canSubmit = useMemo(() => {
@@ -142,7 +152,10 @@ export const useOrgStructurePage = () => {
     })
   }
 
-  const setFormField = <K extends keyof CreateOrgUnitFormState>(key: K, value: CreateOrgUnitFormState[K]) => {
+  const setFormField = <K extends keyof CreateOrgUnitFormState>(
+    key: K,
+    value: CreateOrgUnitFormState[K],
+  ) => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 

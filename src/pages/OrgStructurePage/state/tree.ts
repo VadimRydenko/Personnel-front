@@ -1,35 +1,52 @@
-import type { OrgUnit } from '../../../app/orgStructureApi'
+import type { OrgUnit, OrgUnitTreeNode } from '../../../app/orgStructureApi'
 
 export type TreeNode = OrgUnit & { children: TreeNode[] }
 
-export const buildTree = (items: OrgUnit[]) => {
+const sortTree = (nodes: TreeNode[]) => {
+  nodes.sort((a, b) => a.sortOrder - b.sortOrder)
+  nodes.forEach((n) => sortTree(n.children))
+}
+
+/** Нормалізує вкладену відповідь API в дерево та індекс code → вузол */
+export const normalizeOrgTree = (roots: OrgUnitTreeNode[]) => {
   const byCode = new Map<number, TreeNode>()
 
-  for (const u of items) byCode.set(u.code, { ...u, children: [] })
+  const toTreeNode = (u: OrgUnitTreeNode): TreeNode => {
+    const cached = byCode.get(u.code)
 
-  const roots: TreeNode[] = []
+    if (cached) return cached
 
-  for (const node of byCode.values()) {
-    if (node.parentCode == null) {
-      roots.push(node)
-      continue
+    const node: TreeNode = {
+      ...u,
+      children: (u.children ?? []).map(toTreeNode),
     }
 
-    const parent = byCode.get(node.parentCode)
+    byCode.set(u.code, node)
 
-    if (parent) parent.children.push(node)
-    else roots.push(node)
+    return node
   }
 
-  const sortRec = (n: TreeNode) => {
-    n.children.sort((a, b) => a.sortOrder - b.sortOrder)
-    n.children.forEach(sortRec)
+  const treeRoots = roots.map(toTreeNode)
+
+  sortTree(treeRoots)
+
+  return { roots: treeRoots, byCode }
+}
+
+export const flattenOrgTree = (roots: OrgUnitTreeNode[]): OrgUnit[] => {
+  const out: OrgUnit[] = []
+
+  const walk = (nodes: OrgUnitTreeNode[]) => {
+    for (const { children, ...unit } of nodes) {
+      out.push(unit)
+
+      if (children.length) walk(children)
+    }
   }
 
-  roots.sort((a, b) => a.sortOrder - b.sortOrder)
-  roots.forEach(sortRec)
+  walk(roots)
 
-  return { roots, byCode }
+  return out
 }
 
 export const matchesQuery = (node: TreeNode, q: string): boolean => {
@@ -48,7 +65,7 @@ export const getBreadcrumbs = (code: number, byCode: Map<number, TreeNode>) => {
   while (cur && !seen.has(cur.code)) {
     seen.add(cur.code)
     out.unshift(cur)
-    cur = cur.parentCode == null ? null : byCode.get(cur.parentCode) ?? null
+    cur = cur.parentCode == null ? null : (byCode.get(cur.parentCode) ?? null)
   }
 
   return out

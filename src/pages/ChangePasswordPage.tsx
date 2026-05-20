@@ -15,6 +15,19 @@ import {
 } from '../app/passwordPolicy'
 import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { queryClient } from '../app/queryClient'
+import {
+  Button,
+  Card,
+  CardTitle,
+  Divider,
+  ErrorAlert,
+  Field,
+  FieldInput,
+  FieldLabel,
+  Muted,
+  PageContent,
+} from '../components/ui'
+import { cn } from '../lib/cn'
 import { useMe } from '../hooks/useMe'
 
 export function ChangePasswordPage() {
@@ -121,98 +134,110 @@ export function ChangePasswordPage() {
   }
 
   return (
-    <section className="card">
-      <h1>Зміна пароля</h1>
-      <p className="muted">
-        {isSecurityAdmin ? 'Зміна пароля облікового запису.' : 'Потрібно встановити новий пароль перед продовженням роботи.'}
-      </p>
+    <PageContent>
+      <Card className="max-w-[640px]">
+        <CardTitle>Зміна пароля</CardTitle>
+        <Muted>
+          {isSecurityAdmin
+            ? 'Зміна пароля облікового запису.'
+            : 'Потрібно встановити новий пароль перед продовженням роботи.'}
+        </Muted>
 
-      {passwordExpiryInfo?.expired ? (
-        <p className="error" style={{ marginTop: 12 }}>
-          Термін дії поточного пароля перевищено ({PASSWORD_MAX_VALIDITY_DAYS} днів). Встановіть новий пароль.
-        </p>
-      ) : null}
-
-      {passwordExpiryInfo && !passwordExpiryInfo.expired ? (
-        <p className="muted" style={{ marginTop: 12 }}>
-          Поточний пароль дійсний до {passwordExpiryInfo.untilLabel} (не більше {PASSWORD_MAX_VALIDITY_DAYS} днів від останньої зміни).
-        </p>
-      ) : null}
-
-      {!me.data?.passwordChangedAt ? (
-        <p className="muted" style={{ marginTop: 12 }}>
-          Політика: пароль діє не довше {PASSWORD_MAX_VALIDITY_DAYS} днів від моменту встановлення (контроль на сервері).
-        </p>
-      ) : null}
-
-      <div className="divider" />
-
-      <p className="muted" style={{ marginBottom: 0 }}>
-        Вимоги до нового пароля:
-      </p>
-      <ul className="muted" style={{ marginTop: 8, marginBottom: 16, paddingLeft: 20 }}>
-        <li>щонайменше {MIN_PASSWORD_LENGTH} символів;</li>
-        <li>велика й мала літера, цифра та спецсимвол (мінімум по одному);</li>
-        <li>
-          відмінність від поточного пароля щонайменше на {Math.round(MIN_PASSWORD_NOVELTY_RATIO * 100)}% позицій (порівняння по
-          довжині max(старий, новий));
-        </li>
-        <li>термін дії — до {PASSWORD_MAX_VALIDITY_DAYS} днів від зміни.</li>
-      </ul>
-
-      <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 420 }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span>Поточний пароль</span>
-          <input
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            type="password"
-            autoComplete="current-password"
-          />
-        </label>
-
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span>Новий пароль</span>
-          <input
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            type="password"
-            autoComplete="new-password"
-          />
-        </label>
-
-        {newPassword ? (
-          <ul className={complexityIssues.length ? 'error' : 'muted'} style={{ margin: 0, paddingLeft: 20, fontSize: '0.9em' }}>
-            {complexityIssues.length
-              ? complexityIssues.map((issue) => <li key={issue}>{complexityIssueLabel(issue)}</li>)
-              : (
-                  <li>Складність: вимоги виконано</li>
-                )}
-          </ul>
+        {passwordExpiryInfo?.expired ? (
+          <ErrorAlert className="mt-3">
+            Термін дії поточного пароля перевищено ({PASSWORD_MAX_VALIDITY_DAYS} днів). Встановіть
+            новий пароль.
+          </ErrorAlert>
         ) : null}
 
-        {currentPassword && newPassword ? (
-          <p className={noveltyOk ? 'muted' : 'error'} style={{ margin: 0, fontSize: '0.9em' }}>
-            Відмінність від поточного: {Math.round(noveltyRatio * 100)}% (потрібно ≥ {Math.round(MIN_PASSWORD_NOVELTY_RATIO * 100)}%)
-          </p>
+        {passwordExpiryInfo && !passwordExpiryInfo.expired ? (
+          <Muted className="mt-3">
+            Поточний пароль дійсний до {passwordExpiryInfo.untilLabel} (не більше{' '}
+            {PASSWORD_MAX_VALIDITY_DAYS} днів від останньої зміни).
+          </Muted>
         ) : null}
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span>Підтвердження нового пароля</span>
-          <input
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            type="password"
-            autoComplete="new-password"
-          />
-        </label>
+        {!me.data?.passwordChangedAt ? (
+          <Muted className="mt-3">
+            Політика: пароль діє не довше {PASSWORD_MAX_VALIDITY_DAYS} днів від моменту встановлення
+            (контроль на сервері).
+          </Muted>
+        ) : null}
 
-        {errorText ? <p className="error">{errorText}</p> : null}
+        <Divider />
 
-        <button type="submit" disabled={!canSubmit || isSubmitting}>
-          {isSubmitting ? 'Збереження…' : 'Зберегти новий пароль'}
-        </button>
-      </form>
-    </section>
+        <Muted className="mb-0">Вимоги до нового пароля:</Muted>
+        <ul className="mb-4 mt-2 list-disc pl-5 text-muted">
+          <li>щонайменше {MIN_PASSWORD_LENGTH} символів;</li>
+          <li>велика й мала літера, цифра та спецсимвол (мінімум по одному);</li>
+          <li>
+            відмінність від поточного пароля щонайменше на{' '}
+            {Math.round(MIN_PASSWORD_NOVELTY_RATIO * 100)}% позицій (порівняння по довжині
+            max(старий, новий));
+          </li>
+          <li>термін дії — до {PASSWORD_MAX_VALIDITY_DAYS} днів від зміни.</li>
+        </ul>
+
+        <form className="flex max-w-[420px] flex-col gap-3" onSubmit={onSubmit}>
+          <Field>
+            <FieldLabel>Поточний пароль</FieldLabel>
+            <FieldInput
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              type="password"
+              autoComplete="current-password"
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel>Новий пароль</FieldLabel>
+            <FieldInput
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              type="password"
+              autoComplete="new-password"
+            />
+          </Field>
+
+          {newPassword ? (
+            <ul
+              className={cn(
+                'm-0 list-disc pl-5 text-sm',
+                complexityIssues.length ? 'text-error' : 'text-muted',
+              )}
+            >
+              {complexityIssues.length ? (
+                complexityIssues.map((issue) => <li key={issue}>{complexityIssueLabel(issue)}</li>)
+              ) : (
+                <li>Складність: вимоги виконано</li>
+              )}
+            </ul>
+          ) : null}
+
+          {currentPassword && newPassword ? (
+            <p className={cn('m-0 text-sm', noveltyOk ? 'text-muted' : 'text-error')}>
+              Відмінність від поточного: {Math.round(noveltyRatio * 100)}% (потрібно ≥{' '}
+              {Math.round(MIN_PASSWORD_NOVELTY_RATIO * 100)}%)
+            </p>
+          ) : null}
+
+          <Field>
+            <FieldLabel>Підтвердження нового пароля</FieldLabel>
+            <FieldInput
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              type="password"
+              autoComplete="new-password"
+            />
+          </Field>
+
+          {errorText ? <ErrorAlert>{errorText}</ErrorAlert> : null}
+
+          <Button type="submit" disabled={!canSubmit || isSubmitting}>
+            {isSubmitting ? 'Збереження…' : 'Зберегти новий пароль'}
+          </Button>
+        </form>
+      </Card>
+    </PageContent>
   )
 }

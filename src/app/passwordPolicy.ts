@@ -5,12 +5,7 @@ export const PASSWORD_MAX_VALIDITY_DAYS = 180
 /** Мінімальна частка позицій, де новий пароль відрізняється від поточного (0–1). */
 export const MIN_PASSWORD_NOVELTY_RATIO = 0.5
 
-export type PasswordComplexityIssue =
-  | 'length'
-  | 'upper'
-  | 'lower'
-  | 'digit'
-  | 'special'
+export type PasswordComplexityIssue = 'length' | 'upper' | 'lower' | 'digit' | 'special'
 
 export function getPasswordComplexityIssues(password: string): PasswordComplexityIssue[] {
   const issues: PasswordComplexityIssue[] = []
@@ -93,7 +88,10 @@ export function passwordValidUntil(changedAtIso: string): Date {
   return until
 }
 
-export function isPasswordExpiredByMaxAge(changedAtIso: string | null | undefined, now = new Date()): boolean {
+export function isPasswordExpiredByMaxAge(
+  changedAtIso: string | null | undefined,
+  now = new Date(),
+): boolean {
   if (changedAtIso == null || changedAtIso === '') {
     return false
   }

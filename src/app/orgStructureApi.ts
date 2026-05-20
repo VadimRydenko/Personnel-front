@@ -13,7 +13,10 @@ async function readJson(res: Response): Promise<unknown> {
 }
 
 function getErrorMessage(body: unknown, status: number) {
-  return typeof body === 'object' && body !== null && 'message' in body && typeof (body as { message: unknown }).message === 'string'
+  return typeof body === 'object' &&
+    body !== null &&
+    'message' in body &&
+    typeof (body as { message: unknown }).message === 'string'
     ? (body as { message: string }).message
     : `Request failed (${status})`
 }
@@ -38,9 +41,32 @@ export type OrgUnit = {
   destroyOrder: PersonnelOrder | null
 }
 
+/** Вузол дерева з GET /api/org-units?activeOnly=true */
+export type OrgUnitTreeNode = OrgUnit & { children: OrgUnitTreeNode[] }
+
 export type OrgUnitDetails = OrgUnit & {
   children: OrgUnit[]
   places: unknown[]
+}
+
+const normalizeOrgUnitTreeNode = (raw: unknown): OrgUnitTreeNode => {
+  const u = raw as OrgUnit & { children?: unknown }
+  const children = Array.isArray(u.children) ? u.children.map(normalizeOrgUnitTreeNode) : []
+
+  return { ...u, children }
+}
+
+const parseOrgUnitsListBody = (body: unknown): OrgUnitTreeNode[] => {
+  const raw = Array.isArray(body)
+    ? body
+    : typeof body === 'object' &&
+        body !== null &&
+        'items' in body &&
+        Array.isArray((body as { items: unknown }).items)
+      ? (body as { items: unknown[] }).items
+      : []
+
+  return raw.map(normalizeOrgUnitTreeNode)
 }
 
 export async function fetchOrgCatalog(): Promise<{ unitTypes: UnitType[] }> {
@@ -52,10 +78,14 @@ export async function fetchOrgCatalog(): Promise<{ unitTypes: UnitType[] }> {
   return body as { unitTypes: UnitType[] }
 }
 
-export async function fetchOrgUnits(params?: { parentCode?: number | null; activeOnly?: boolean }): Promise<{ items: OrgUnit[] }> {
+export async function fetchOrgUnits(params?: {
+  parentCode?: number | null
+  activeOnly?: boolean
+}): Promise<{ items: OrgUnitTreeNode[] }> {
   const sp = new URLSearchParams()
 
-  if (params?.parentCode !== undefined) sp.set('parentCode', params.parentCode === null ? 'null' : String(params.parentCode))
+  if (params?.parentCode !== undefined)
+    sp.set('parentCode', params.parentCode === null ? 'null' : String(params.parentCode))
 
   if (params?.activeOnly !== undefined) sp.set('activeOnly', params.activeOnly ? 'true' : 'false')
 
@@ -66,11 +96,13 @@ export async function fetchOrgUnits(params?: { parentCode?: number | null; activ
 
   if (!res.ok) throw new Error(getErrorMessage(body, res.status))
 
-  return body as { items: OrgUnit[] }
+  return { items: parseOrgUnitsListBody(body) }
 }
 
 export async function fetchOrgUnit(code: number): Promise<OrgUnitDetails> {
-  const res = await fetch(`${getApiBaseUrl()}/api/org-units/${encodeURIComponent(String(code))}`, { credentials: 'include' })
+  const res = await fetch(`${getApiBaseUrl()}/api/org-units/${encodeURIComponent(String(code))}`, {
+    credentials: 'include',
+  })
   const body = await readJson(res)
 
   if (!res.ok) throw new Error(getErrorMessage(body, res.status))

@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useSession } from '../app/authClient'
 import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { useMe } from '../hooks/useMe'
+import { Muted } from './ui'
 
 export function RequireAuth(props: { children: ReactNode; adminOnly?: boolean | undefined }) {
   const session = useSession()
@@ -10,7 +11,7 @@ export function RequireAuth(props: { children: ReactNode; adminOnly?: boolean | 
   const location = useLocation()
 
   if (session.isPending) {
-    return <p className="muted">Завантаження сесії…</p>
+    return <Muted>Завантаження сесії…</Muted>
   }
 
   if (!session.data?.user) {
@@ -19,7 +20,7 @@ export function RequireAuth(props: { children: ReactNode; adminOnly?: boolean | 
 
   if (props.adminOnly) {
     if (me.isPending) {
-      return <p className="muted">Завантаження профілю…</p>
+      return <Muted>Завантаження профілю…</Muted>
     }
 
     if (me.isError || !hasSecurityAdminRole(me.data)) {

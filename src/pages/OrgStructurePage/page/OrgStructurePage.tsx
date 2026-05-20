@@ -1,3 +1,4 @@
+import { PageContent } from '../../../components/ui'
 import { useOrgStructurePage } from '../state/useOrgStructurePage'
 import { CreateOrgUnitModal } from '../ui/CreateOrgUnitModal'
 import { OrgTreePanel } from '../ui/OrgTreePanel'
@@ -7,12 +8,12 @@ export const OrgStructurePage = () => {
   const state = useOrgStructurePage()
 
   return (
-    <div className="pageContent pageContent--flush flex min-h-0 flex-1 flex-col">
+    <PageContent flush className="min-h-0 flex-1">
       <div className="flex min-h-0 flex-1 overflow-hidden max-[900px]:flex-col max-[900px]:overflow-visible">
         <OrgTreePanel state={state} />
         <UnitCardPanel state={state} />
         <section
-          className="box-border flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-l border-[var(--surface-border)] bg-[var(--main-bg)] px-5 py-4 max-[900px]:w-full max-[900px]:flex-[0_1_auto] max-[900px]:border-l-0 max-[900px]:border-t max-[900px]:border-[var(--surface-border)] max-[900px]:overflow-visible"
+          className="box-border flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-l border-border bg-main px-5 py-4 max-[900px]:w-full max-[900px]:flex-[0_1_auto] max-[900px]:border-l-0 max-[900px]:border-t max-[900px]:overflow-visible"
           aria-label="Контент підрозділу"
         >
           <div className="min-h-[200px] flex-1" />
@@ -31,6 +32,6 @@ export const OrgStructurePage = () => {
           onSubmit={state.createModal.submit}
         />
       ) : null}
-    </div>
+    </PageContent>
   )
 }

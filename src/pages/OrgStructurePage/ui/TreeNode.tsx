@@ -1,4 +1,5 @@
 import { ChevronDown, ChevronRight, Folder } from 'lucide-react'
+import { cn } from '../../../lib/cn'
 import type { TreeNode } from '../state/tree'
 import { matchesQuery } from '../state/tree'
 
@@ -29,7 +30,7 @@ export const AccNode = ({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-transparent bg-transparent text-[var(--muted)] hover:bg-slate-100 hover:text-[var(--text)] disabled:cursor-default disabled:opacity-60"
+          className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-transparent bg-transparent text-muted hover:bg-slate-100 hover:text-ink disabled:cursor-default disabled:opacity-60"
           disabled={!hasChildren}
           aria-label={
             hasChildren ? (isExpanded ? 'Згорнути' : 'Розгорнути') : 'Немає підпідрозділів'
@@ -53,7 +54,10 @@ export const AccNode = ({
 
         <button
           type="button"
-          className={`flex min-w-0 flex-1 cursor-pointer items-center justify-between border-b border-[var(--surface-border)] bg-transparent py-2 text-left hover:bg-slate-400/10 ${isActive ? 'bg-blue-500/10' : ''}`}
+          className={cn(
+            'flex min-w-0 flex-1 cursor-pointer items-center justify-between border-b border-border bg-transparent py-2 text-left hover:bg-slate-400/10',
+            isActive && 'bg-accent/10',
+          )}
           onClick={() => onSelect(node.code)}
           title={node.name || `#${node.code}`}
         >
@@ -64,15 +68,15 @@ export const AccNode = ({
             >
               <Folder size={18} strokeWidth={1.75} aria-hidden />
             </span>
-            <span className="truncate text-base font-semibold text-[var(--text)]">
+            <span className="truncate text-base font-semibold text-ink">
               {node.name || `#${node.code}`}
             </span>
           </span>
           <span className="inline-flex shrink-0 items-center gap-2.5">
-            <span className="whitespace-nowrap text-[0.95rem] text-[var(--muted)]">
+            <span className="whitespace-nowrap text-[0.95rem] text-muted">
               {node.unitType?.val ?? ''}
             </span>
-            <span className="whitespace-nowrap text-[0.95rem] font-bold text-[var(--muted)]">
+            <span className="whitespace-nowrap text-[0.95rem] font-bold text-muted">
               ({node.children.length})
             </span>
           </span>
@@ -80,7 +84,7 @@ export const AccNode = ({
       </div>
 
       {hasChildren && isExpanded ? (
-        <ul className="m-0 mt-1.5 flex list-none flex-col space-y-1.5 border-l border-dashed border-[var(--surface-border)] pl-4">
+        <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 border-l border-dashed border-border pl-4">
           {node.children.map((c) => (
             <AccNode
               key={c.code}

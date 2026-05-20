@@ -1,14 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import {
-  BarChart3,
-  Bell,
-  Briefcase,
-  FileText,
-  Home,
-  Users,
-  Network,
-  BookOpen
-} from 'lucide-react'
+import { BarChart3, Bell, Briefcase, FileText, Home, Users, Network, BookOpen } from 'lucide-react'
 
 export type NavItem = {
   to: string
