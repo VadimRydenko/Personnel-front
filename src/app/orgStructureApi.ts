@@ -35,7 +35,7 @@ export type OrgUnit = {
   validTo: string | null
   createOrderCode: number
   destroyOrderCode: number | null
-  stationing: string
+  city: string | null
   unitType: UnitType | null
   createOrder: PersonnelOrder | null
   destroyOrder: PersonnelOrder | null
@@ -115,7 +115,7 @@ export type CreateOrgUnitPayload = {
   unitTypeCode: number
   name: string
   validFrom: string
-  stationing?: string
+  city?: string
   createOrder?: { orderNo: string; orderDate: string }
   createOrderCode?: number
 }

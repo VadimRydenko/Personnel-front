@@ -95,6 +95,15 @@ export const CreateOrgUnitModal = (props: {
             />
           </Field>
 
+          <Field>
+            <FieldLabel>Місцезнаходження</FieldLabel>
+            <FieldInput
+              value={form.value.city}
+              onChange={(e) => form.setField('city', e.target.value)}
+              placeholder="Напр. м. Київ"
+            />
+          </Field>
+
           <div className="flex gap-3.5 max-[900px]:flex-col">
             <Field className="min-w-0 flex-1">
               <FieldLabel>№ наказу</FieldLabel>

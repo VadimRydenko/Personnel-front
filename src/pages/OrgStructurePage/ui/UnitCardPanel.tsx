@@ -30,10 +30,7 @@ export const UnitCardPanel = ({ state }: { state: OrgStructurePageState }) => {
               (state.selectedCode ? `Підрозділ #${state.selectedCode}` : 'Підрозділ')}
           </h1>
           <Muted className="text-sm">
-            {state.selectedDetailsQuery.data?.stationing
-              ? state.selectedDetailsQuery.data.stationing
-              : '—'}{' '}
-            ·{' '}
+            {state.selectedDetailsQuery.data?.city ? state.selectedDetailsQuery.data.city : '—'} ·{' '}
             {state.selectedDetailsQuery.data?.places
               ? `${state.selectedDetailsQuery.data.places.length} штатних одиниць`
               : '—'}

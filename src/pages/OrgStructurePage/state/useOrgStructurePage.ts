@@ -29,6 +29,7 @@ export type CreateOrgUnitFormState = {
   parentCode: string
   unitTypeCode: string
   name: string
+  city: string
   orderNo: string
   orderDate: string
 }
@@ -104,6 +105,7 @@ export const useOrgStructurePage = () => {
     parentCode: '',
     unitTypeCode: '',
     name: '',
+    city: '',
     orderNo: '',
     orderDate: dateInputValue(new Date()),
   })
@@ -118,6 +120,7 @@ export const useOrgStructurePage = () => {
         parentCode: '',
         unitTypeCode: '',
         name: '',
+        city: '',
         orderNo: '',
         orderDate: dateInputValue(new Date()),
       })
@@ -143,11 +146,14 @@ export const useOrgStructurePage = () => {
   const submitCreate = () => {
     setCreateErrorText(null)
 
+    const city = form.city.trim()
+
     createMutation.mutate({
       parentCode: form.parentCode ? Number(form.parentCode) : null,
       unitTypeCode: Number(form.unitTypeCode),
       name: form.name.trim(),
       validFrom: form.orderDate,
+      ...(city ? { city } : {}),
       createOrder: { orderNo: form.orderNo.trim(), orderDate: form.orderDate },
     })
   }
