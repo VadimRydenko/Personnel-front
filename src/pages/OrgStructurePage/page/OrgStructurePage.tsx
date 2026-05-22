@@ -1,4 +1,4 @@
-import { PageContent } from '../../../components/ui'
+import { Muted, PageContent } from '../../../components/ui'
 import { useOrgStructurePage } from '../state/useOrgStructurePage'
 import { CreateOrgUnitModal } from '../ui/CreateOrgUnitModal'
 import { OrgTreePanel } from '../ui/OrgTreePanel'
@@ -13,10 +13,12 @@ export const OrgStructurePage = () => {
         <OrgTreePanel state={state} />
         <UnitCardPanel state={state} />
         <section
-          className="box-border flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-l border-border bg-main px-5 py-4 max-[900px]:w-full max-[900px]:flex-[0_1_auto] max-[900px]:border-l-0 max-[900px]:border-t max-[900px]:overflow-visible"
-          aria-label="Контент підрозділу"
+          className="box-border flex w-[400px] shrink-0 flex-col overflow-hidden border-l border-border bg-main max-[900px]:hidden"
+          aria-label="Картка підрозділу"
         >
-          <div className="min-h-[200px] flex-1" />
+          <div className="flex min-h-[200px] flex-1 items-center justify-center px-5 py-4">
+            <Muted className="text-center text-sm">Картка підрозділу (незабаром)</Muted>
+          </div>
         </section>
       </div>
 

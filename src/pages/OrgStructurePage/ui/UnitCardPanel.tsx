@@ -1,76 +1,130 @@
+import { Building2, Download, MapPin, MoreHorizontal, Printer, Users } from 'lucide-react'
 import { ErrorAlert, Muted } from '../../../components/ui'
 import type { OrgStructurePageState } from '../state/useOrgStructurePage'
+import { TypeFilterPill, UnitChildCard } from './UnitChildCard'
 
-const fmtDate = (value: string | null | undefined) => {
-  if (!value) return '—'
-
-  return String(value).slice(0, 10).split('-').reverse().join('.')
-}
+const stubActionClass =
+  'inline-flex h-9 items-center gap-2 rounded-sm border border-border bg-white px-3 text-sm font-medium text-ink opacity-70'
 
 export const UnitCardPanel = ({ state }: { state: OrgStructurePageState }) => {
   const crumbs = state.selectedBreadcrumbs
+  const details = state.selectedDetailsQuery.data
+  const placesCount = details?.places?.length
+  const childrenCount = state.selectedNode?.children.length ?? 0
+  const pathSortOrders = crumbs.map((c) => c.sortOrder)
+
+  const title =
+    details?.name ?? (state.selectedCode != null ? `Підрозділ #${state.selectedCode}` : 'Підрозділ')
+
+  const cityLabel = details?.city?.trim() || '—'
+  const staffLabel = placesCount != null ? `${placesCount} штатних одиниць` : '— штатних одиниць'
+  const subdivisionsLabel =
+    childrenCount > 0
+      ? `${childrenCount} ${childrenCount === 1 ? 'підрозділ' : childrenCount < 5 ? 'підрозділи' : 'підрозділів'}`
+      : '0 підрозділів'
+
+  const unitTypes = state.catalogQuery.data?.unitTypes ?? []
 
   return (
     <section
-      className="box-border flex w-[520px] shrink-0 flex-col overflow-hidden border-l border-border bg-main px-5 py-4 min-w-0 max-[900px]:w-full max-[900px]:flex-[0_1_auto] max-[900px]:border-l-0 max-[900px]:border-t max-[900px]:overflow-visible"
-      aria-label="Картка підрозділу"
+      className="box-border flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-l border-border bg-main px-5 py-4 max-[900px]:w-full max-[900px]:flex-[0_1_auto] max-[900px]:border-l-0 max-[900px]:border-t max-[900px]:overflow-visible"
+      aria-label="Контент підрозділу"
     >
-      <div className="mb-2.5">
-        {crumbs.length ? (
-          <Muted>{crumbs.map((x) => x.name || `#${x.code}`).join(' / ')}</Muted>
-        ) : (
-          <Muted>Оберіть підрозділ зліва</Muted>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between gap-3.5">
-        <div>
-          <h1 className="mb-1 text-[1.65rem] font-extrabold tracking-[-0.03em] text-ink">
-            {state.selectedDetailsQuery.data?.name ||
-              (state.selectedCode ? `Підрозділ #${state.selectedCode}` : 'Підрозділ')}
-          </h1>
-          <Muted className="text-sm">
-            {state.selectedDetailsQuery.data?.city ? state.selectedDetailsQuery.data.city : '—'} ·{' '}
-            {state.selectedDetailsQuery.data?.places
-              ? `${state.selectedDetailsQuery.data.places.length} штатних одиниць`
-              : '—'}
+      {state.selectedCode == null ? (
+        <div className="flex flex-1 flex-col justify-center">
+          <Muted className="text-center">
+            Оберіть підрозділ зліва, щоб переглянути вкладені підрозділи.
           </Muted>
         </div>
-      </div>
-
-      <hr className="my-3 h-0 shrink-0 border-0 border-t border-border" aria-hidden />
-
-      {state.selectedCode == null ? (
-        <Muted>Виберіть підрозділ, щоб побачити деталі.</Muted>
-      ) : state.selectedDetailsQuery.isLoading ? (
-        <Muted>Завантаження…</Muted>
-      ) : state.selectedDetailsQuery.isError ? (
-        <ErrorAlert>Не вдалося завантажити підрозділ</ErrorAlert>
       ) : (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col">
-            <div className="flex items-baseline justify-between gap-3 border-b border-border py-2.5 last:border-b-0">
-              <span className="text-sm font-semibold text-muted">Тип</span>
-              <span className="text-right font-bold text-ink">
-                {state.selectedDetailsQuery.data?.unitType?.val ?? '—'}
-              </span>
+        <>
+          <div className="shrink-0">
+            <p className="m-0 text-sm text-muted">
+              {crumbs.length ? crumbs.map((x) => x.name || `#${x.code}`).join(' / ') : '—'}
+            </p>
+
+            <div className="mt-2 flex items-start justify-between gap-4">
+              <h1 className="m-0 min-w-0 flex-1 text-[1.65rem] font-extrabold leading-tight tracking-[-0.03em] text-ink">
+                {state.selectedDetailsQuery.isLoading ? 'Завантаження…' : title}
+              </h1>
+              <div className="flex shrink-0 items-center gap-2">
+                <button type="button" className={stubActionClass} disabled title="Незабаром">
+                  <Printer size={16} strokeWidth={2} aria-hidden />
+                  Друк
+                </button>
+                <button type="button" className={stubActionClass} disabled title="Незабаром">
+                  <Download size={16} strokeWidth={2} aria-hidden />
+                  Експорт
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-border bg-white text-ink opacity-70"
+                  disabled
+                  title="Незабаром"
+                  aria-label="Ще"
+                >
+                  <MoreHorizontal size={18} strokeWidth={2} aria-hidden />
+                </button>
+              </div>
             </div>
-            <div className="flex items-baseline justify-between gap-3 border-b border-border py-2.5 last:border-b-0">
-              <span className="text-sm font-semibold text-muted">Наказ</span>
-              <span className="text-right font-bold text-ink">
-                {state.selectedDetailsQuery.data?.createOrder
-                  ? `№ ${state.selectedDetailsQuery.data.createOrder.orderNo} від ${fmtDate(state.selectedDetailsQuery.data.createOrder.orderDate)}`
-                  : '—'}
+
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted">
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin size={16} strokeWidth={2} aria-hidden className="shrink-0" />
+                {cityLabel}
               </span>
-            </div>
-            <div className="flex items-baseline justify-between gap-3 border-b border-border py-2.5 last:border-b-0">
-              <span className="text-sm font-semibold text-muted">Дата створення</span>
-              <span className="text-right font-bold text-ink">
-                {fmtDate(state.selectedDetailsQuery.data?.validFrom)}
+              <span className="inline-flex items-center gap-1.5">
+                <Users size={16} strokeWidth={2} aria-hidden className="shrink-0" />
+                {staffLabel}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Building2 size={16} strokeWidth={2} aria-hidden className="shrink-0" />
+                {subdivisionsLabel}
               </span>
             </div>
           </div>
-        </div>
+
+          {state.selectedDetailsQuery.isError ? (
+            <ErrorAlert className="mt-4 shrink-0">Не вдалося завантажити підрозділ</ErrorAlert>
+          ) : null}
+
+          <div className="mt-5 flex shrink-0 flex-wrap gap-2 overflow-x-auto pb-1">
+            <TypeFilterPill active={!state.typeFilter} onClick={() => state.setTypeFilter('')}>
+              Усі типи
+            </TypeFilterPill>
+            {unitTypes.map((t) => (
+              <TypeFilterPill
+                key={t.code}
+                active={state.typeFilter === String(t.code)}
+                onClick={() => state.setTypeFilter(String(t.code))}
+              >
+                {t.val}
+              </TypeFilterPill>
+            ))}
+          </div>
+
+          <div className="mt-4 min-h-0 flex-1 overflow-auto">
+            {state.childUnits.length === 0 ? (
+              <Muted>
+                {state.selectedNode && state.selectedNode.children.length > 0
+                  ? 'Немає підрозділів для обраного типу.'
+                  : 'У цьому підрозділі немає вкладених підрозділів.'}
+              </Muted>
+            ) : (
+              <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                {state.childUnits.map((child) => (
+                  <li key={child.code}>
+                    <UnitChildCard
+                      unit={child}
+                      pathSortOrders={pathSortOrders}
+                      onSelect={state.setSelectedCode}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
       )}
     </section>
   )

@@ -57,6 +57,19 @@ export const matchesQuery = (node: TreeNode, q: string): boolean => {
   return node.children.some((c) => matchesQuery(c, q))
 }
 
+/** Коди предків від кореня до батька (для розгортання гілки в акордеоні) */
+export const getAncestorCodes = (code: number, byCode: Map<number, TreeNode>) => {
+  const ancestors: number[] = []
+  let cur = byCode.get(code) ?? null
+
+  while (cur?.parentCode != null) {
+    ancestors.push(cur.parentCode)
+    cur = byCode.get(cur.parentCode) ?? null
+  }
+
+  return ancestors
+}
+
 export const getBreadcrumbs = (code: number, byCode: Map<number, TreeNode>) => {
   const out: OrgUnit[] = []
   const seen = new Set<number>()

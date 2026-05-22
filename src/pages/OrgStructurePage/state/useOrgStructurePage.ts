@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   createOrgUnit,
   fetchOrgCatalog,
@@ -12,6 +12,7 @@ import { queryClient } from '../../../app/queryClient'
 import {
   expandAllExpandable,
   flattenOrgTree,
+  getAncestorCodes,
   getBreadcrumbs,
   matchesQuery,
   normalizeOrgTree,
@@ -48,7 +49,10 @@ export const useOrgStructurePage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const normalizedQuery = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery])
 
-  const [selectedCode, setSelectedCode] = useState<number | null>(null)
+  const [selectedCode, setSelectedCodeState] = useState<number | null>(null)
+  const [typeFilter, setTypeFilter] = useState('')
+  const [expanded, setExpanded] = useState<Set<number>>(() => new Set())
+
   const selectedDetailsQuery = useQuery({
     queryKey: ['org-units', 'details', selectedCode],
     queryFn: () => fetchOrgUnit(selectedCode as number),
@@ -78,7 +82,39 @@ export const useOrgStructurePage = () => {
     return [...items].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'uk'))
   }, [unitsQuery.data?.items])
 
-  const [expanded, setExpanded] = useState<Set<number>>(() => new Set())
+  const selectedNode = useMemo(() => {
+    if (selectedCode == null) return null
+
+    return tree.byCode.get(selectedCode) ?? null
+  }, [selectedCode, tree.byCode])
+
+  const childUnits = useMemo(() => {
+    if (!selectedNode) return []
+
+    if (!typeFilter) return selectedNode.children
+
+    return selectedNode.children.filter((c) => String(c.unitTypeCode) === typeFilter)
+  }, [selectedNode, typeFilter])
+
+  const setSelectedCode = useCallback(
+    (code: number | null) => {
+      setTypeFilter('')
+      setSelectedCodeState(code)
+
+      if (code == null) return
+
+      setExpanded((prev) => {
+        const next = new Set(prev)
+
+        for (const anc of getAncestorCodes(code, tree.byCode)) {
+          next.add(anc)
+        }
+
+        return next
+      })
+    },
+    [tree.byCode],
+  )
 
   const collapseAll = () => {
     setExpanded(new Set())
@@ -184,7 +220,11 @@ export const useOrgStructurePage = () => {
     selectedCode,
     setSelectedCode,
     selectedBreadcrumbs,
+    selectedNode,
     selectedDetailsQuery,
+    childUnits,
+    typeFilter,
+    setTypeFilter,
 
     parents,
 
