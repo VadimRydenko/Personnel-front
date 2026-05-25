@@ -1,8 +1,10 @@
-import { Muted, PageContent } from '../../../components/ui'
+import { PageContent } from '../../../components/ui'
 import { useOrgStructurePage } from '../state/useOrgStructurePage'
 import { CreateOrgUnitModal } from '../ui/CreateOrgUnitModal'
 import { OrgTreePanel } from '../ui/OrgTreePanel'
 import { UnitCardPanel } from '../ui/UnitCardPanel'
+import { UnitDetailCardRail } from '../ui/UnitDetailCardRail'
+import { UnitDetailSidePanel } from '../ui/UnitDetailSidePanel'
 
 export const OrgStructurePage = () => {
   const state = useOrgStructurePage()
@@ -12,14 +14,11 @@ export const OrgStructurePage = () => {
       <div className="flex min-h-0 flex-1 overflow-hidden max-[900px]:flex-col max-[900px]:overflow-visible">
         <OrgTreePanel state={state} />
         <UnitCardPanel state={state} />
-        <section
-          className="box-border flex w-[400px] shrink-0 flex-col overflow-hidden border-l border-border bg-main max-[900px]:hidden"
-          aria-label="Картка підрозділу"
-        >
-          <div className="flex min-h-[200px] flex-1 items-center justify-center px-5 py-4">
-            <Muted className="text-center text-sm">Картка підрозділу (незабаром)</Muted>
-          </div>
-        </section>
+        {state.detailCardOpen && state.selectedCode != null ? (
+          <UnitDetailSidePanel state={state} />
+        ) : state.selectedCode != null ? (
+          <UnitDetailCardRail onOpen={state.openDetailCard} />
+        ) : null}
       </div>
 
       {state.createModal.isOpen ? (

@@ -26,6 +26,8 @@ const dateInputValue = (d: Date) => {
   return `${yyyy}-${mm}-${dd}`
 }
 
+export type DetailCardTab = 'attributes' | 'positions' | 'documents' | 'history'
+
 export type CreateOrgUnitFormState = {
   parentCode: string
   unitTypeCode: string
@@ -52,6 +54,8 @@ export const useOrgStructurePage = () => {
   const [selectedCode, setSelectedCodeState] = useState<number | null>(null)
   const [typeFilter, setTypeFilter] = useState('')
   const [expanded, setExpanded] = useState<Set<number>>(() => new Set())
+  const [detailCardOpen, setDetailCardOpen] = useState(false)
+  const [detailCardTab, setDetailCardTab] = useState<DetailCardTab>('attributes')
 
   const selectedDetailsQuery = useQuery({
     queryKey: ['org-units', 'details', selectedCode],
@@ -96,12 +100,27 @@ export const useOrgStructurePage = () => {
     return selectedNode.children.filter((c) => String(c.unitTypeCode) === typeFilter)
   }, [selectedNode, typeFilter])
 
+  const closeDetailCard = useCallback(() => {
+    setDetailCardOpen(false)
+  }, [])
+
+  const openDetailCard = useCallback(() => {
+    setDetailCardOpen(true)
+  }, [])
+
   const setSelectedCode = useCallback(
     (code: number | null) => {
       setTypeFilter('')
       setSelectedCodeState(code)
 
-      if (code == null) return
+      if (code == null) {
+        setDetailCardOpen(false)
+
+        return
+      }
+
+      setDetailCardOpen(true)
+      setDetailCardTab('attributes')
 
       setExpanded((prev) => {
         const next = new Set(prev)
@@ -219,6 +238,11 @@ export const useOrgStructurePage = () => {
 
     selectedCode,
     setSelectedCode,
+    detailCardOpen,
+    closeDetailCard,
+    openDetailCard,
+    detailCardTab,
+    setDetailCardTab,
     selectedBreadcrumbs,
     selectedNode,
     selectedDetailsQuery,
