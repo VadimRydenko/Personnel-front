@@ -1,6 +1,7 @@
 import { PageContent } from '../../../components/ui'
 import { useOrgStructurePage } from '../state/useOrgStructurePage'
 import { CreateOrgUnitModal } from '../ui/CreateOrgUnitModal'
+import { CreatePlaceModal } from '../ui/CreatePlaceModal'
 import { OrgTreePanel } from '../ui/OrgTreePanel'
 import { UnitCardPanel } from '../ui/UnitCardPanel'
 import { UnitDetailCardRail } from '../ui/UnitDetailCardRail'
@@ -31,6 +32,19 @@ export const OrgStructurePage = () => {
           isSubmitting={state.createModal.isSubmitting}
           onClose={state.createModal.close}
           onSubmit={state.createModal.submit}
+        />
+      ) : null}
+
+      {state.createPlaceModal.isOpen ? (
+        <CreatePlaceModal
+          unitTitle={state.createPlaceModal.unitTitle}
+          catalogQuery={state.catalogQuery}
+          form={state.createPlaceModal.form}
+          canSubmit={state.createPlaceModal.canSubmit}
+          errorText={state.createPlaceModal.errorText}
+          isSubmitting={state.createPlaceModal.isSubmitting}
+          onClose={state.createPlaceModal.close}
+          onSubmit={state.createPlaceModal.submit}
         />
       ) : null}
     </PageContent>

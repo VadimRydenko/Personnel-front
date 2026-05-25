@@ -1,15 +1,19 @@
-import { Building2, Download, MapPin, MoreHorizontal, Printer, Users } from 'lucide-react'
+import { Building2, Download, MapPin, MoreHorizontal, Plus, Printer, Users } from 'lucide-react'
 import { ErrorAlert, Muted } from '../../../components/ui'
 import type { OrgStructurePageState } from '../state/useOrgStructurePage'
 import { TypeFilterPill, UnitChildCard } from './UnitChildCard'
+import { UnitPlacesSection } from './UnitPlacesSection'
 
 const stubActionClass =
   'inline-flex h-9 items-center gap-2 rounded-sm border border-border bg-white px-3 text-sm font-medium text-ink opacity-70'
 
+const actionClass =
+  'inline-flex h-9 cursor-pointer items-center gap-2 rounded-sm border border-border bg-white px-3 text-sm font-medium text-ink hover:bg-slate-50'
+
 export const UnitCardPanel = ({ state }: { state: OrgStructurePageState }) => {
   const crumbs = state.selectedBreadcrumbs
   const details = state.selectedDetailsQuery.data
-  const placesCount = details?.places?.length
+  const placesCount = state.selectedPlaces?.length ?? details?.places?.length
   const childrenCount = state.selectedNode?.children.length ?? 0
   const pathSortOrders = crumbs.map((c) => c.sortOrder)
 
@@ -24,6 +28,7 @@ export const UnitCardPanel = ({ state }: { state: OrgStructurePageState }) => {
       : '0 підрозділів'
 
   const unitTypes = state.catalogQuery.data?.unitTypes ?? []
+  const hasChildUnits = childrenCount > 0
 
   return (
     <section
@@ -48,6 +53,15 @@ export const UnitCardPanel = ({ state }: { state: OrgStructurePageState }) => {
                 {state.selectedDetailsQuery.isLoading ? 'Завантаження…' : title}
               </h1>
               <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  className={actionClass}
+                  onClick={state.createPlaceModal.open}
+                  title="Створити посаду"
+                >
+                  <Plus size={16} strokeWidth={2} aria-hidden />
+                  Нова посада
+                </button>
                 <button type="button" className={stubActionClass} disabled title="Незабаром">
                   <Printer size={16} strokeWidth={2} aria-hidden />
                   Друк
@@ -88,42 +102,49 @@ export const UnitCardPanel = ({ state }: { state: OrgStructurePageState }) => {
             <ErrorAlert className="mt-4 shrink-0">Не вдалося завантажити підрозділ</ErrorAlert>
           ) : null}
 
-          <div className="mt-5 flex shrink-0 flex-wrap gap-2 overflow-x-auto pb-1">
-            <TypeFilterPill active={!state.typeFilter} onClick={() => state.setTypeFilter('')}>
-              Усі типи
-            </TypeFilterPill>
-            {unitTypes.map((t) => (
-              <TypeFilterPill
-                key={t.code}
-                active={state.typeFilter === String(t.code)}
-                onClick={() => state.setTypeFilter(String(t.code))}
-              >
-                {t.val}
-              </TypeFilterPill>
-            ))}
-          </div>
+          <UnitPlacesSection
+            key={state.selectedCode}
+            places={state.selectedPlaces}
+            isLoading={state.selectedPlacesLoading}
+            isError={state.selectedPlacesError}
+          />
 
-          <div className="mt-4 min-h-0 flex-1 overflow-auto">
-            {state.childUnits.length === 0 ? (
-              <Muted>
-                {state.selectedNode && state.selectedNode.children.length > 0
-                  ? 'Немає підрозділів для обраного типу.'
-                  : 'У цьому підрозділі немає вкладених підрозділів.'}
-              </Muted>
-            ) : (
-              <ul className="m-0 flex list-none flex-col gap-3 p-0">
-                {state.childUnits.map((child) => (
-                  <li key={child.code}>
-                    <UnitChildCard
-                      unit={child}
-                      pathSortOrders={pathSortOrders}
-                      onSelect={state.setSelectedCode}
-                    />
-                  </li>
+          {hasChildUnits ? (
+            <>
+              <div className="mt-5 flex shrink-0 flex-wrap gap-2 overflow-x-auto pb-1">
+                <TypeFilterPill active={!state.typeFilter} onClick={() => state.setTypeFilter('')}>
+                  Усі типи
+                </TypeFilterPill>
+                {unitTypes.map((t) => (
+                  <TypeFilterPill
+                    key={t.code}
+                    active={state.typeFilter === String(t.code)}
+                    onClick={() => state.setTypeFilter(String(t.code))}
+                  >
+                    {t.val}
+                  </TypeFilterPill>
                 ))}
-              </ul>
-            )}
-          </div>
+              </div>
+
+              <div className="mt-4 min-h-0 flex-1 overflow-auto">
+                {state.childUnits.length === 0 ? (
+                  <Muted>Немає підрозділів для обраного типу.</Muted>
+                ) : (
+                  <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                    {state.childUnits.map((child) => (
+                      <li key={child.code}>
+                        <UnitChildCard
+                          unit={child}
+                          pathSortOrders={pathSortOrders}
+                          onSelect={state.setSelectedCode}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </>
+          ) : null}
         </>
       )}
     </section>

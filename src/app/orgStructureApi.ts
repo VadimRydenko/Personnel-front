@@ -23,6 +23,8 @@ function getErrorMessage(body: unknown, status: number) {
 
 export type UnitType = { code: number; val: string; valGenitive: string }
 
+export type PlaceType = { code: number; val: string }
+
 export type PersonnelOrder = { code: number; orderNo: string; orderDate: string }
 
 export type OrgUnit = {
@@ -44,9 +46,32 @@ export type OrgUnit = {
 /** Вузол дерева з GET /api/org-units?activeOnly=true */
 export type OrgUnitTreeNode = OrgUnit & { children: OrgUnitTreeNode[] }
 
+export type OrgPlace = {
+  code: number
+  orgUnitCode: number
+  placeTypeCode: number
+  sortOrder: number
+  posCount: number
+  isChief: boolean
+  manCount: number
+  validFrom: string
+  validTo: string | null
+  createOrderCode: number
+  destroyOrderCode: number | null
+  placeType: { code: number; val: string } | null
+  createOrder: PersonnelOrder | null
+  destroyOrder: PersonnelOrder | null
+  orgUnit: {
+    code: number
+    name: string
+    shortName: string | null
+    city: string
+  } | null
+}
+
 export type OrgUnitDetails = OrgUnit & {
   children: OrgUnit[]
-  places: unknown[]
+  places: OrgPlace[]
 }
 
 const normalizeOrgUnitTreeNode = (raw: unknown): OrgUnitTreeNode => {
@@ -69,13 +94,21 @@ const parseOrgUnitsListBody = (body: unknown): OrgUnitTreeNode[] => {
   return raw.map(normalizeOrgUnitTreeNode)
 }
 
-export async function fetchOrgCatalog(): Promise<{ unitTypes: UnitType[] }> {
+export async function fetchOrgCatalog(): Promise<{
+  unitTypes: UnitType[]
+  placeTypes: PlaceType[]
+}> {
   const res = await fetch(`${getApiBaseUrl()}/api/org-units/catalog`, { credentials: 'include' })
   const body = await readJson(res)
 
   if (!res.ok) throw new Error(getErrorMessage(body, res.status))
 
-  return body as { unitTypes: UnitType[] }
+  const data = body as { unitTypes?: UnitType[]; placeTypes?: PlaceType[] }
+
+  return {
+    unitTypes: data.unitTypes ?? [],
+    placeTypes: data.placeTypes ?? [],
+  }
 }
 
 export async function fetchOrgUnits(params?: {
@@ -97,6 +130,20 @@ export async function fetchOrgUnits(params?: {
   if (!res.ok) throw new Error(getErrorMessage(body, res.status))
 
   return { items: parseOrgUnitsListBody(body) }
+}
+
+export async function fetchOrgUnitPlaces(orgUnitCode: number): Promise<{ items: OrgPlace[] }> {
+  const res = await fetch(
+    `${getApiBaseUrl()}/api/org-units/${encodeURIComponent(String(orgUnitCode))}/places`,
+    { credentials: 'include' },
+  )
+  const body = await readJson(res)
+
+  if (!res.ok) throw new Error(getErrorMessage(body, res.status))
+
+  const data = body as { items?: OrgPlace[] }
+
+  return { items: data.items ?? [] }
 }
 
 export async function fetchOrgUnit(code: number): Promise<OrgUnitDetails> {
@@ -132,4 +179,33 @@ export async function createOrgUnit(payload: CreateOrgUnitPayload): Promise<OrgU
   if (!res.ok) throw new Error(getErrorMessage(body, res.status))
 
   return body as OrgUnit
+}
+
+export type CreatePlacePayload = {
+  placeTypeCode: number
+  validFrom: string
+  createOrder?: { orderNo: string; orderDate: string }
+  createOrderCode?: number
+  posCount?: number
+  isChief?: boolean
+}
+
+export async function createPlace(
+  orgUnitCode: number,
+  payload: CreatePlacePayload,
+): Promise<unknown> {
+  const res = await fetch(
+    `${getApiBaseUrl()}/api/org-units/${encodeURIComponent(String(orgUnitCode))}/places`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  )
+  const body = await readJson(res)
+
+  if (!res.ok) throw new Error(getErrorMessage(body, res.status))
+
+  return body
 }

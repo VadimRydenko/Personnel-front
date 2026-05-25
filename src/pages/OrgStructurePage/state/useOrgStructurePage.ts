@@ -1,11 +1,16 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   createOrgUnit,
+  createPlace,
   fetchOrgCatalog,
   fetchOrgUnit,
+  fetchOrgUnitPlaces,
   fetchOrgUnits,
+  type OrgPlace,
   type OrgUnit,
+  type PlaceType,
   type UnitType,
 } from '../../../app/orgStructureApi'
 import { queryClient } from '../../../app/queryClient'
@@ -37,7 +42,27 @@ export type CreateOrgUnitFormState = {
   orderDate: string
 }
 
+export type CreatePlaceFormState = {
+  placeTypeCode: string
+  orderNo: string
+  orderDate: string
+  validFrom: string
+}
+
+const emptyCreatePlaceForm = (): CreatePlaceFormState => ({
+  placeTypeCode: '',
+  orderNo: '',
+  orderDate: dateInputValue(new Date()),
+  validFrom: dateInputValue(new Date()),
+})
+
+const isStaffingPath = (pathname: string) =>
+  pathname === '/staffing' || pathname.startsWith('/staffing/')
+
 export const useOrgStructurePage = () => {
+  const location = useLocation()
+  const isStaffingPage = isStaffingPath(location.pathname)
+
   const catalogQuery = useQuery({
     queryKey: ['org-units', 'catalog'],
     queryFn: fetchOrgCatalog,
@@ -67,6 +92,69 @@ export const useOrgStructurePage = () => {
     () => normalizeOrgTree(unitsQuery.data?.items ?? []),
     [unitsQuery.data?.items],
   )
+
+  const staffingPlaceUnitCodes = useMemo(() => {
+    const codes = new Set<number>()
+
+    for (const root of tree.roots) {
+      codes.add(root.code)
+    }
+
+    for (const code of expanded) {
+      codes.add(code)
+    }
+
+    if (selectedCode != null) {
+      codes.add(selectedCode)
+    }
+
+    return [...codes].sort((a, b) => a - b)
+  }, [expanded, selectedCode, tree.roots])
+
+  const staffingPlacesQueries = useQueries({
+    queries: staffingPlaceUnitCodes.map((orgUnitCode) => ({
+      queryKey: ['org-units', 'places', orgUnitCode] as const,
+      queryFn: () => fetchOrgUnitPlaces(orgUnitCode),
+      enabled: isStaffingPage,
+    })),
+  })
+
+  const placesByUnitCode = useMemo(() => {
+    const map = new Map<number, OrgPlace[]>()
+
+    staffingPlaceUnitCodes.forEach((orgUnitCode, index) => {
+      const items = staffingPlacesQueries[index]?.data?.items
+
+      if (items) map.set(orgUnitCode, items)
+    })
+
+    return map
+  }, [staffingPlaceUnitCodes, staffingPlacesQueries])
+
+  const selectedPlacesQueryIndex =
+    selectedCode != null ? staffingPlaceUnitCodes.indexOf(selectedCode) : -1
+
+  const selectedPlacesLoading =
+    isStaffingPage &&
+    selectedCode != null &&
+    (selectedPlacesQueryIndex < 0 ||
+      staffingPlacesQueries[selectedPlacesQueryIndex]?.isLoading === true)
+
+  const selectedPlacesError =
+    isStaffingPage &&
+    selectedCode != null &&
+    selectedPlacesQueryIndex >= 0 &&
+    staffingPlacesQueries[selectedPlacesQueryIndex]?.isError === true
+
+  const selectedPlaces = useMemo(() => {
+    if (selectedCode == null) return undefined
+
+    if (isStaffingPage) {
+      return placesByUnitCode.get(selectedCode)
+    }
+
+    return selectedDetailsQuery.data?.places
+  }, [isStaffingPage, placesByUnitCode, selectedCode, selectedDetailsQuery.data?.places])
 
   const visibleRoots = useMemo(() => {
     if (!normalizedQuery) return tree.roots
@@ -102,11 +190,11 @@ export const useOrgStructurePage = () => {
 
   const closeDetailCard = useCallback(() => {
     setDetailCardOpen(false)
-  }, [])
+  }, [setDetailCardOpen])
 
   const openDetailCard = useCallback(() => {
     setDetailCardOpen(true)
-  }, [])
+  }, [setDetailCardOpen])
 
   const setSelectedCode = useCallback(
     (code: number | null) => {
@@ -132,7 +220,14 @@ export const useOrgStructurePage = () => {
         return next
       })
     },
-    [tree.byCode],
+    [
+      tree.byCode,
+      setTypeFilter,
+      setSelectedCodeState,
+      setDetailCardOpen,
+      setDetailCardTab,
+      setExpanded,
+    ],
   )
 
   const collapseAll = () => {
@@ -220,7 +315,96 @@ export const useOrgStructurePage = () => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
+  const [isCreatePlaceOpen, setIsCreatePlaceOpen] = useState(false)
+  const [createPlaceErrorText, setCreatePlaceErrorText] = useState<string | null>(null)
+  const [createPlaceForm, setCreatePlaceForm] = useState<CreatePlaceFormState>(emptyCreatePlaceForm)
+
+  const createPlaceMutation = useMutation({
+    mutationFn: ({
+      orgUnitCode,
+      payload,
+    }: {
+      orgUnitCode: number
+      payload: Parameters<typeof createPlace>[1]
+    }) => createPlace(orgUnitCode, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['org-units'] })
+      await queryClient.invalidateQueries({ queryKey: ['org-units', 'places'] })
+      setIsCreatePlaceOpen(false)
+      setCreatePlaceErrorText(null)
+      setCreatePlaceForm(emptyCreatePlaceForm())
+    },
+    onError: (e) =>
+      setCreatePlaceErrorText(e instanceof Error ? e.message : 'Не вдалося створити посаду'),
+  })
+
+  const canSubmitCreatePlace = useMemo(() => {
+    return Boolean(
+      createPlaceForm.placeTypeCode &&
+      createPlaceForm.orderNo.trim() &&
+      createPlaceForm.orderDate &&
+      createPlaceForm.validFrom,
+    )
+  }, [
+    createPlaceForm.orderDate,
+    createPlaceForm.orderNo,
+    createPlaceForm.placeTypeCode,
+    createPlaceForm.validFrom,
+  ])
+
+  const openCreatePlace = () => {
+    if (selectedCode == null) return
+
+    setCreatePlaceForm(emptyCreatePlaceForm())
+    setCreatePlaceErrorText(null)
+    setIsCreatePlaceOpen(true)
+  }
+
+  const closeCreatePlace = () => {
+    setIsCreatePlaceOpen(false)
+    setCreatePlaceErrorText(null)
+  }
+
+  const submitCreatePlace = () => {
+    if (selectedCode == null) return
+
+    setCreatePlaceErrorText(null)
+
+    createPlaceMutation.mutate({
+      orgUnitCode: selectedCode,
+      payload: {
+        placeTypeCode: Number(createPlaceForm.placeTypeCode),
+        validFrom: createPlaceForm.validFrom,
+        createOrder: {
+          orderNo: createPlaceForm.orderNo.trim(),
+          orderDate: createPlaceForm.orderDate,
+        },
+      },
+    })
+  }
+
+  const setCreatePlaceFormField = <K extends keyof CreatePlaceFormState>(
+    key: K,
+    value: CreatePlaceFormState[K],
+  ) => {
+    setCreatePlaceForm((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const selectedUnitTitle =
+    selectedDetailsQuery.data?.name ??
+    (selectedCode != null ? `Підрозділ #${selectedCode}` : 'Підрозділ')
+
   return {
+    isStaffingPage,
+    staffing: {
+      unitCodes: staffingPlaceUnitCodes,
+      placesByUnitCode,
+    },
+
+    selectedPlaces,
+    selectedPlacesLoading: isStaffingPage ? selectedPlacesLoading : selectedDetailsQuery.isLoading,
+    selectedPlacesError: isStaffingPage ? selectedPlacesError : selectedDetailsQuery.isError,
+
     catalogQuery,
     unitsQuery,
 
@@ -265,10 +449,25 @@ export const useOrgStructurePage = () => {
         setField: setFormField,
       },
     },
+
+    createPlaceModal: {
+      isOpen: isCreatePlaceOpen,
+      open: openCreatePlace,
+      close: closeCreatePlace,
+      submit: submitCreatePlace,
+      errorText: createPlaceErrorText,
+      isSubmitting: createPlaceMutation.isPending,
+      canSubmit: canSubmitCreatePlace,
+      unitTitle: selectedUnitTitle,
+      form: {
+        value: createPlaceForm,
+        setField: setCreatePlaceFormField,
+      },
+    },
   } as const
 }
 
 export type OrgStructurePageState = ReturnType<typeof useOrgStructurePage>
 
-export type OrgCatalog = { unitTypes: UnitType[] }
+export type OrgCatalog = { unitTypes: UnitType[]; placeTypes: PlaceType[] }
 export type OrgUnitSummary = OrgUnit
