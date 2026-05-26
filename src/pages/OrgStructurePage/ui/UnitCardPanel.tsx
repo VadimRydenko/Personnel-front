@@ -107,6 +107,8 @@ export const UnitCardPanel = ({ state }: { state: OrgStructurePageState }) => {
             places={state.selectedPlaces}
             isLoading={state.selectedPlacesLoading}
             isError={state.selectedPlacesError}
+            selectedPlaceCode={state.selectedPlaceCode}
+            onSelectPlace={state.setSelectedPlaceCode}
           />
 
           {hasChildUnits ? (

@@ -4,6 +4,8 @@ import { CreateOrgUnitModal } from '../ui/CreateOrgUnitModal'
 import { CreatePlaceModal } from '../ui/CreatePlaceModal'
 import { OrgTreePanel } from '../ui/OrgTreePanel'
 import { UnitCardPanel } from '../ui/UnitCardPanel'
+import { PlaceDetailCardRail } from '../ui/PlaceDetailCardRail'
+import { PlaceDetailSidePanel } from '../ui/PlaceDetailSidePanel'
 import { UnitDetailCardRail } from '../ui/UnitDetailCardRail'
 import { UnitDetailSidePanel } from '../ui/UnitDetailSidePanel'
 
@@ -15,7 +17,11 @@ export const OrgStructurePage = () => {
       <div className="flex min-h-0 flex-1 overflow-hidden max-[900px]:flex-col max-[900px]:overflow-visible">
         <OrgTreePanel state={state} />
         <UnitCardPanel state={state} />
-        {state.detailCardOpen && state.selectedCode != null ? (
+        {state.placeDetailCardOpen && state.selectedPlaceCode != null ? (
+          <PlaceDetailSidePanel state={state} />
+        ) : state.selectedPlaceCode != null ? (
+          <PlaceDetailCardRail onOpen={state.openPlaceDetailCard} />
+        ) : state.detailCardOpen && state.selectedCode != null ? (
           <UnitDetailSidePanel state={state} />
         ) : state.selectedCode != null ? (
           <UnitDetailCardRail onOpen={state.openDetailCard} />

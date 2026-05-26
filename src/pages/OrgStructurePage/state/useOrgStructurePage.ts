@@ -5,6 +5,7 @@ import {
   createOrgUnit,
   createPlace,
   fetchOrgCatalog,
+  fetchOrgPlace,
   fetchOrgUnit,
   fetchOrgUnitPlaces,
   fetchOrgUnits,
@@ -32,6 +33,8 @@ const dateInputValue = (d: Date) => {
 }
 
 export type DetailCardTab = 'attributes' | 'positions' | 'documents' | 'history'
+
+export type PlaceDetailCardTab = 'attributes' | 'currentState' | 'documents' | 'history'
 
 export type CreateOrgUnitFormState = {
   parentCode: string
@@ -81,11 +84,20 @@ export const useOrgStructurePage = () => {
   const [expanded, setExpanded] = useState<Set<number>>(() => new Set())
   const [detailCardOpen, setDetailCardOpen] = useState(false)
   const [detailCardTab, setDetailCardTab] = useState<DetailCardTab>('attributes')
+  const [selectedPlaceCode, setSelectedPlaceCodeState] = useState<number | null>(null)
+  const [placeDetailCardOpen, setPlaceDetailCardOpen] = useState(false)
+  const [placeDetailCardTab, setPlaceDetailCardTab] = useState<PlaceDetailCardTab>('attributes')
 
   const selectedDetailsQuery = useQuery({
     queryKey: ['org-units', 'details', selectedCode],
     queryFn: () => fetchOrgUnit(selectedCode as number),
     enabled: selectedCode != null,
+  })
+
+  const selectedPlaceDetailsQuery = useQuery({
+    queryKey: ['org-units', 'places', 'details', selectedCode, selectedPlaceCode],
+    queryFn: () => fetchOrgPlace(selectedCode as number, selectedPlaceCode as number),
+    enabled: selectedCode != null && selectedPlaceCode != null,
   })
 
   const tree = useMemo(
@@ -196,9 +208,34 @@ export const useOrgStructurePage = () => {
     setDetailCardOpen(true)
   }, [setDetailCardOpen])
 
+  const closePlaceDetailCard = useCallback(() => {
+    setPlaceDetailCardOpen(false)
+  }, [setPlaceDetailCardOpen])
+
+  const openPlaceDetailCard = useCallback(() => {
+    setPlaceDetailCardOpen(true)
+  }, [setPlaceDetailCardOpen])
+
+  const setSelectedPlaceCode = useCallback(
+    (code: number | null) => {
+      setSelectedPlaceCodeState(code)
+
+      if (code == null) {
+        setPlaceDetailCardOpen(false)
+
+        return
+      }
+
+      setPlaceDetailCardOpen(true)
+      setPlaceDetailCardTab('attributes')
+    },
+    [setSelectedPlaceCodeState, setPlaceDetailCardOpen, setPlaceDetailCardTab],
+  )
+
   const setSelectedCode = useCallback(
     (code: number | null) => {
       setTypeFilter('')
+      setSelectedPlaceCode(null)
       setSelectedCodeState(code)
 
       if (code == null) {
@@ -223,6 +260,7 @@ export const useOrgStructurePage = () => {
     [
       tree.byCode,
       setTypeFilter,
+      setSelectedPlaceCode,
       setSelectedCodeState,
       setDetailCardOpen,
       setDetailCardTab,
@@ -427,6 +465,14 @@ export const useOrgStructurePage = () => {
     openDetailCard,
     detailCardTab,
     setDetailCardTab,
+    selectedPlaceCode,
+    setSelectedPlaceCode,
+    placeDetailCardOpen,
+    closePlaceDetailCard,
+    openPlaceDetailCard,
+    placeDetailCardTab,
+    setPlaceDetailCardTab,
+    selectedPlaceDetailsQuery,
     selectedBreadcrumbs,
     selectedNode,
     selectedDetailsQuery,

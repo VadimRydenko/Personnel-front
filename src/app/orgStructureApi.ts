@@ -74,6 +74,15 @@ export type OrgUnitDetails = OrgUnit & {
   places: OrgPlace[]
 }
 
+export type PlaceDisplayStatus = 'vacant' | 'occupied' | 'processing' | 'reduced'
+
+export type OrgPlaceDetails = OrgPlace & {
+  status: PlaceDisplayStatus
+  statusLabel: string
+  title: string
+  assignee: { manCode: number; fullName: string } | null
+}
+
 const normalizeOrgUnitTreeNode = (raw: unknown): OrgUnitTreeNode => {
   const u = raw as OrgUnit & { children?: unknown }
   const children = Array.isArray(u.children) ? u.children.map(normalizeOrgUnitTreeNode) : []
@@ -130,6 +139,21 @@ export async function fetchOrgUnits(params?: {
   if (!res.ok) throw new Error(getErrorMessage(body, res.status))
 
   return { items: parseOrgUnitsListBody(body) }
+}
+
+export async function fetchOrgPlace(
+  orgUnitCode: number,
+  placeCode: number,
+): Promise<OrgPlaceDetails> {
+  const res = await fetch(
+    `${getApiBaseUrl()}/api/org-units/${encodeURIComponent(String(orgUnitCode))}/places/${encodeURIComponent(String(placeCode))}`,
+    { credentials: 'include' },
+  )
+  const body = await readJson(res)
+
+  if (!res.ok) throw new Error(getErrorMessage(body, res.status))
+
+  return body as OrgPlaceDetails
 }
 
 export async function fetchOrgUnitPlaces(orgUnitCode: number): Promise<{ items: OrgPlace[] }> {

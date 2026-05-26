@@ -28,10 +28,14 @@ export const UnitPlacesSection = ({
   places,
   isLoading,
   isError,
+  selectedPlaceCode,
+  onSelectPlace,
 }: {
   places: OrgPlace[] | undefined
   isLoading: boolean
   isError: boolean
+  selectedPlaceCode?: number | null
+  onSelectPlace?: (placeCode: number) => void
 }) => {
   const [statusFilter, setStatusFilter] = useState<PlaceStatusFilter>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -119,11 +123,23 @@ export const UnitPlacesSection = ({
               ) : (
                 filteredPlaces.map((place) => {
                   const status = getPlaceDisplayStatus(place)
+                  const isSelected = selectedPlaceCode === place.code
 
                   return (
                     <tr
                       key={place.code}
-                      className="border-b border-border last:border-b-0 hover:bg-slate-50/60"
+                      className={cn(
+                        'border-b border-border last:border-b-0 hover:bg-slate-50/60',
+                        onSelectPlace && 'cursor-pointer',
+                        isSelected && 'bg-slate-100/80',
+                      )}
+                      onClick={
+                        onSelectPlace
+                          ? () => {
+                              onSelectPlace(place.code)
+                            }
+                          : undefined
+                      }
                     >
                       <td className={cn(tdClass, 'font-medium')}>{place.placeType?.val ?? '—'}</td>
                       <td className={tdClass}>—</td>
