@@ -1,13 +1,13 @@
 import { PageContent } from '../../../components/ui'
 import { useOrgStructurePage } from '../state/useOrgStructurePage'
-import { CreateOrgUnitModal } from '../ui/CreateOrgUnitModal'
-import { CreatePlaceModal } from '../ui/CreatePlaceModal'
-import { OrgTreePanel } from '../ui/OrgTreePanel'
-import { UnitCardPanel } from '../ui/UnitCardPanel'
-import { PlaceDetailCardRail } from '../ui/PlaceDetailCardRail'
-import { PlaceDetailSidePanel } from '../ui/PlaceDetailSidePanel'
-import { UnitDetailCardRail } from '../ui/UnitDetailCardRail'
-import { UnitDetailSidePanel } from '../ui/UnitDetailSidePanel'
+import { CreateOrgUnitModal } from '../components/CreateOrgUnitModal'
+import { CreatePlaceModal } from '../components/CreatePlaceModal'
+import { OrgTreePanel } from '../components/OrgTreePanel'
+import { UnitCardPanel } from '../components/UnitCardPanel'
+import { PlaceDetailCardRail } from '../components/PlaceDetailCardRail'
+import { PlaceDetailSidePanel } from '../components/PlaceDetailSidePanel'
+import { UnitDetailCardRail } from '../components/UnitDetailCardRail'
+import { UnitDetailSidePanel } from '../components/UnitDetailSidePanel'
 
 export const OrgStructurePage = () => {
   const state = useOrgStructurePage()
