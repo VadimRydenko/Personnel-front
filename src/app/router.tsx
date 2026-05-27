@@ -5,6 +5,8 @@ import { placeholderTitles } from './navItems'
 import { AdminUserDirectoryPage } from '../pages/AdminUserDirectoryPage'
 import { AdminUsersPage } from '../pages/AdminUsersPage'
 import { ChangePasswordPage } from '../pages/ChangePasswordPage'
+import { CreateDocumentPage } from '../pages/CreateDocumentPage'
+import { DocumentsPage } from '../pages/DocumentsPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
@@ -24,6 +26,8 @@ export const appRouter = createBrowserRouter([
       { path: 'login', element: <LoginPage /> },
       { index: true, element: <HomePage /> },
       { path: 'staffing', element: <OrgStructurePage /> },
+      { path: 'documents', element: <DocumentsPage /> },
+      { path: 'documents/new', element: <CreateDocumentPage /> },
       ...placeholderRoutes,
       {
         path: 'change-password',
