@@ -43,7 +43,7 @@ export const UnitCardPanel = ({ state }: { state: OrgStructurePageState }) => {
         </div>
       ) : (
         <>
-          <div className="shrink-0">
+          <div className="shrink-0 -mx-5 -mt-4 border-b border-border bg-surface px-5 pt-4 pb-4">
             <p className="m-0 text-sm text-muted">
               {crumbs.length ? crumbs.map((x) => x.name || `#${x.code}`).join(' / ') : '—'}
             </p>

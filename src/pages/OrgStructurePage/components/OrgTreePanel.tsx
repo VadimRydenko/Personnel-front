@@ -6,11 +6,11 @@ import { OrgTree } from './OrgTree'
 export const OrgTreePanel = ({ state }: { state: OrgStructurePageState }) => {
   return (
     <section
-      className="box-border flex w-[360px] shrink-0 flex-col overflow-hidden bg-main px-5 py-4 min-w-0 max-[900px]:w-full max-[900px]:flex-[0_1_auto] max-[900px]:overflow-visible"
+      className="box-border flex w-[360px] shrink-0 flex-col overflow-hidden bg-surface px-5 py-4 min-w-0 max-[900px]:w-full max-[900px]:flex-[0_1_auto] max-[900px]:overflow-visible"
       aria-label="Підрозділи"
     >
       <div className="mb-3 flex flex-col gap-3">
-        <label className="flex h-11 cursor-text items-center gap-2 rounded-lg border border-border bg-white px-3">
+        <label className="flex h-11 cursor-text items-center gap-2 rounded-sm border border-border bg-white px-3">
           <span className="sr-only">Пошук підрозділу</span>
           <Search size={16} strokeWidth={2} aria-hidden className="shrink-0 text-muted" />
           <input
@@ -22,7 +22,7 @@ export const OrgTreePanel = ({ state }: { state: OrgStructurePageState }) => {
           {state.searchQuery.trim() ? (
             <button
               type="button"
-              className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-muted hover:bg-slate-100 hover:text-ink"
+              className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent text-muted hover:bg-slate-100 hover:text-ink"
               onClick={() => state.setSearchQuery('')}
               title="Очистити"
             >
@@ -35,7 +35,7 @@ export const OrgTreePanel = ({ state }: { state: OrgStructurePageState }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className="inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-lg border border-border bg-white hover:bg-slate-50"
+              className="inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-sm border border-border bg-white hover:bg-slate-50"
               title="Згорнути всі"
               onClick={state.collapseAll}
             >
@@ -43,7 +43,7 @@ export const OrgTreePanel = ({ state }: { state: OrgStructurePageState }) => {
             </button>
             <button
               type="button"
-              className="inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-lg border border-border bg-white hover:bg-slate-50"
+              className="inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-sm border border-border bg-white hover:bg-slate-50"
               title="Розгорнути всі"
               onClick={state.expandAll}
             >
@@ -51,7 +51,7 @@ export const OrgTreePanel = ({ state }: { state: OrgStructurePageState }) => {
             </button>
             <button
               type="button"
-              className="inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-lg border border-accent bg-accent text-white hover:border-accent-hover hover:bg-accent-hover"
+              className="inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-sm border border-sidebar bg-sidebar text-white hover:bg-sidebar/95"
               title="Новий підрозділ"
               onClick={state.createModal.open}
             >
@@ -60,7 +60,7 @@ export const OrgTreePanel = ({ state }: { state: OrgStructurePageState }) => {
           </div>
 
           <div
-            className="inline-flex h-[38px] items-center gap-2 rounded-lg border border-border bg-white px-3 text-sm font-semibold text-muted"
+            className="inline-flex h-[38px] items-center gap-2 rounded-sm border border-border bg-white px-3 text-sm font-semibold text-muted"
             title="Поточна дата"
           >
             <Calendar size={16} strokeWidth={2} aria-hidden />
@@ -69,7 +69,7 @@ export const OrgTreePanel = ({ state }: { state: OrgStructurePageState }) => {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto pr-0.5">
+      <div className="min-h-0 flex-1 overflow-auto -mx-5 px-0.5">
         {state.unitsQuery.isLoading ? (
           <Muted>Завантаження…</Muted>
         ) : state.unitsQuery.isError ? (
