@@ -1,29 +1,60 @@
+import { useQuery } from '@tanstack/react-query'
 import { Download, LayoutGrid, List, Printer, Search, UserPlus } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { fetchEmployees, type Employee } from '../../../app/employeesApi'
 import { PageContent, PageTitle } from '../../../components/ui'
 import { cn } from '../../../lib/cn'
+import { CreateEmployeeModal } from '../components/CreateEmployeeModal'
 import { PersonnelCard } from '../components/PersonnelCard'
 import { PersonnelRow } from '../components/PersonnelRow'
-import { FILTER_TABS, MOCK_PEOPLE, STAT_LABELS, STAT_ORDER, STATUS_DOT } from '../constants'
-import type { PersonStatus } from '../types'
+import { FILTER_TABS, STAT_LABELS, STAT_ORDER, STATUS_DOT } from '../constants'
+import { useCreateEmployee } from '../state/useCreateEmployee'
+import type { Person, PersonStatus } from '../types'
+
+function employeeToPerson(e: Employee): Person {
+  const fullName = [e.lastName, e.firstName, e.middleName].filter(Boolean).join(' ')
+
+  return {
+    id: e.id,
+    fullName,
+    lastName: e.lastName,
+    firstName: e.firstName,
+    status: 'active',
+    position: e.title ?? null,
+    rank: null,
+    unit: null,
+  }
+}
 
 export function PersonnelPage() {
   const [statusFilter, setStatusFilter] = useState<PersonStatus | null>(null)
   const [query, setQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const createEmployeeHook = useCreateEmployee(() => setIsModalOpen(false))
+
+  const employeesQuery = useQuery({
+    queryKey: ['employees'],
+    queryFn: () => fetchEmployees({ pageSize: 100 }),
+  })
+
+  const people = useMemo(
+    () => (employeesQuery.data?.items ?? []).map(employeeToPerson),
+    [employeesQuery.data],
+  )
 
   const counts = useMemo(() => {
     const result = {} as Record<PersonStatus, number>
 
-    for (const p of MOCK_PEOPLE) result[p.status] = (result[p.status] ?? 0) + 1
+    for (const p of people) result[p.status] = (result[p.status] ?? 0) + 1
 
     return result
-  }, [])
+  }, [people])
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
 
-    return MOCK_PEOPLE.filter((p) => {
+    return people.filter((p) => {
       if (statusFilter && p.status !== statusFilter) return false
 
       if (
@@ -36,7 +67,7 @@ export function PersonnelPage() {
 
       return true
     })
-  }, [statusFilter, query])
+  }, [statusFilter, query, people])
 
   const tabBtnClass = (active: boolean) =>
     cn(
@@ -61,7 +92,7 @@ export function PersonnelPage() {
         <div className="flex items-center gap-3">
           <PageTitle>Особовий склад</PageTitle>
           <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-slate-900 px-2 text-sm font-bold text-white tabular-nums">
-            {MOCK_PEOPLE.length}
+            {employeesQuery.data?.total ?? 0}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -82,6 +113,7 @@ export function PersonnelPage() {
           <button
             type="button"
             className="inline-flex h-9 items-center gap-2 rounded-sm border border-transparent bg-accent px-3 text-sm font-semibold text-white shadow-card hover:bg-accent-hover"
+            onClick={() => setIsModalOpen(true)}
           >
             <UserPlus size={16} strokeWidth={1.75} aria-hidden />
             Новий співробітник
@@ -145,7 +177,15 @@ export function PersonnelPage() {
 
       {/* Content */}
       <div className="mt-5">
-        {visible.length === 0 ? (
+        {employeesQuery.isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <p className="text-sm text-muted">Завантаження…</p>
+          </div>
+        ) : employeesQuery.isError ? (
+          <div className="flex items-center justify-center py-16">
+            <p className="text-sm text-rose-600">{employeesQuery.error.message}</p>
+          </div>
+        ) : visible.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="m-0 text-sm font-semibold text-ink">
               Немає співробітників для поточного фільтра.
@@ -182,6 +222,10 @@ export function PersonnelPage() {
           </div>
         )}
       </div>
+
+      {isModalOpen && (
+        <CreateEmployeeModal hook={createEmployeeHook} onClose={() => setIsModalOpen(false)} />
+      )}
     </PageContent>
   )
 }
