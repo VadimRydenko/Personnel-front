@@ -20,7 +20,6 @@ export const mainNavItems: NavItem[] = [
 ]
 
 export const placeholderTitles: Record<string, string> = {
-  '/personnel': 'Особовий склад',
   '/vacancies': 'Вакантні посади',
   '/analytics': 'Аналітика',
   '/notifications': 'Сповіщення',

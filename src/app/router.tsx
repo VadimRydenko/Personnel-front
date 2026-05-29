@@ -10,6 +10,7 @@ import { DocumentsPage } from '../pages/DocumentsPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
+import { PersonnelPage } from '../pages/PersonnelPage'
 import { PlaceholderPage } from '../pages/PlaceholderPage'
 import { OrgStructurePage } from '../pages/OrgStructurePage'
 
@@ -26,6 +27,7 @@ export const appRouter = createBrowserRouter([
       { path: 'login', element: <LoginPage /> },
       { index: true, element: <HomePage /> },
       { path: 'staffing', element: <OrgStructurePage /> },
+      { path: 'personnel', element: <PersonnelPage /> },
       { path: 'documents', element: <DocumentsPage /> },
       { path: 'documents/new', element: <CreateDocumentPage /> },
       ...placeholderRoutes,
