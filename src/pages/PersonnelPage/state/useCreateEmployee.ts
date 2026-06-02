@@ -1,8 +1,20 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { createEmployee } from '../../../app/employeesApi'
-import { fetchOrgUnitPlaces, fetchOrgUnits } from '../../../app/orgStructureApi'
+import {
+  type OrgUnitTreeNode,
+  assignEmployeeToPlace,
+  fetchOrgUnitPlaces,
+  fetchOrgUnits,
+} from '../../../app/orgStructureApi'
 import { queryClient } from '../../../app/queryClient'
+
+function flattenTree(
+  nodes: OrgUnitTreeNode[],
+  depth = 0,
+): Array<OrgUnitTreeNode & { depth: number }> {
+  return nodes.flatMap((node) => [{ ...node, depth }, ...flattenTree(node.children, depth + 1)])
+}
 
 export type CreateEmployeeFormState = {
   lastName: string
@@ -53,7 +65,24 @@ export function useCreateEmployee(onSuccess: () => void) {
   }
 
   const mutation = useMutation({
-    mutationFn: createEmployee,
+    mutationFn: async (values: CreateEmployeeFormState) => {
+      const employee = await createEmployee({
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        middleName: values.middleName.trim() || undefined,
+      })
+
+      const unitCode = Number(values.unitCode)
+      const placeCode = Number(values.positionCode)
+
+      await assignEmployeeToPlace(unitCode, placeCode, {
+        employeeCode: (employee as unknown as { code: number }).code,
+        validFrom: values.hireDate,
+        createOrder: { orderNo: 'б/н', orderDate: values.hireDate },
+      })
+
+      return employee
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
       setFormState(emptyForm())
@@ -65,7 +94,7 @@ export function useCreateEmployee(onSuccess: () => void) {
     },
   })
 
-  const units = unitsQuery.data?.items ?? []
+  const units = flattenTree(unitsQuery.data?.items ?? [])
 
   const places = placesQuery.data?.items ?? []
 
@@ -74,22 +103,26 @@ export function useCreateEmployee(onSuccess: () => void) {
   function submit() {
     if (!canSubmit) return
 
-    const unitCode = form.unitCode ? Number(form.unitCode) : undefined
-    const positionCode = form.positionCode ? Number(form.positionCode) : undefined
+    if (!form.unitCode) {
+      setErrorText('Оберіть підрозділ')
 
-    const selectedPlace = positionCode ? places.find((p) => p.code === positionCode) : undefined
+      return
+    }
 
-    const title = selectedPlace?.placeType?.val
+    if (!form.positionCode) {
+      setErrorText('Оберіть посаду')
 
-    mutation.mutate({
-      firstName: form.firstName.trim(),
-      lastName: form.lastName.trim(),
-      middleName: form.middleName.trim() || undefined,
-      title,
-      unitCode,
-      positionCode,
-      hireDate: form.hireDate || undefined,
-    })
+      return
+    }
+
+    if (!form.hireDate) {
+      setErrorText('Вкажіть дату прийняття')
+
+      return
+    }
+
+    setErrorText(null)
+    mutation.mutate(form)
   }
 
   return {

@@ -233,3 +233,34 @@ export async function createPlace(
 
   return body
 }
+
+export type AssignEmployeeToPlacePayload = {
+  employeeCode: number
+  validFrom: string
+  createOrder?: { orderNo: string; orderDate: string }
+  orderCode?: number
+  sPlace?: string
+  koef?: number
+  percentRate?: number
+}
+
+export async function assignEmployeeToPlace(
+  orgUnitCode: number,
+  placeCode: number,
+  payload: AssignEmployeeToPlacePayload,
+): Promise<unknown> {
+  const res = await fetch(
+    `${getApiBaseUrl()}/api/org-units/${encodeURIComponent(String(orgUnitCode))}/places/${encodeURIComponent(String(placeCode))}/employee-places`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  )
+  const body = await readJson(res)
+
+  if (!res.ok) throw new Error(getErrorMessage(body, res.status))
+
+  return body
+}

@@ -15,12 +15,12 @@ function employeeToPerson(e: Employee): Person {
   const fullName = [e.lastName, e.firstName, e.middleName].filter(Boolean).join(' ')
 
   return {
-    id: e.id,
+    id: String(e.code),
     fullName,
     lastName: e.lastName,
     firstName: e.firstName,
     status: 'active',
-    position: e.title ?? null,
+    position: null,
     rank: null,
     unit: null,
   }

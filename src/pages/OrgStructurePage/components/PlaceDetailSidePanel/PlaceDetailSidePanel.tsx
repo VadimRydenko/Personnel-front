@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { ErrorAlert, StackedActionButtons, Muted } from '../../../../components/ui'
 import { cn } from '../../../../lib/cn'
@@ -132,8 +133,9 @@ export const PlaceDetailSidePanel = ({ state }: { state: OrgStructurePageState }
   const isLoading = state.selectedPlaceDetailsQuery.isLoading
   const isVacant = details?.status === 'vacant'
   const isReduced = details?.status === 'reduced'
+  const navigate = useNavigate()
 
-  const cardActions = useMemo(() => getPlaceCardActions(details), [details])
+  const cardActions = useMemo(() => getPlaceCardActions(details, navigate), [details, navigate])
 
   return (
     <section

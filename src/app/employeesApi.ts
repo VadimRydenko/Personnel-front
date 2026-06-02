@@ -22,26 +22,25 @@ function getErrorMessage(body: unknown, status: number) {
 }
 
 export type Employee = {
-  id: string
+  code: number
   firstName: string
   lastName: string
   middleName?: string
-  title?: string
-  unitCode?: number
-  positionCode?: number
-  hireDate?: string
-  createdAt: string
-  updatedAt: string
+  signature?: string
+  birthday?: string | null
+  personalNo?: string | null
+  sex?: string
+  idNo?: string | null
+  validFrom?: string | null
+  validTo?: string
+  lastPlaceCode?: number | null
+  remarks?: string | null
 }
 
 export type CreateEmployeePayload = {
   firstName: string
   lastName: string
   middleName?: string
-  title?: string
-  unitCode?: number
-  positionCode?: number
-  hireDate?: string
 }
 
 export type EmployeesListResponse = {

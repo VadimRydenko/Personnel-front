@@ -24,12 +24,12 @@ export function CreateEmployeeModal({ hook, onClose }: Props) {
       aria-modal="true"
       aria-label="Новий співробітник"
     >
-      <div className="w-full max-w-[420px] overflow-hidden rounded-[22px] border border-border bg-surface shadow-[0_24px_80px_rgba(15,23,42,0.22)]">
-        <div className="flex items-center justify-between px-[22px] pb-3.5 pt-5">
+      <div className="w-full max-w-105 overflow-hidden rounded-[22px] border border-border bg-surface shadow-[0_24px_80px_rgba(15,23,42,0.22)]">
+        <div className="flex items-center justify-between px-5.5 pb-3.5 pt-5">
           <h2 className="m-0 text-2xl font-bold tracking-[-0.02em] text-ink">Новий співробітник</h2>
           <button
             type="button"
-            className="inline-flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-xl border border-transparent bg-transparent text-muted hover:bg-slate-100 hover:text-ink"
+            className="inline-flex h-9.5 w-9.5 cursor-pointer items-center justify-center rounded-xl border border-transparent bg-transparent text-muted hover:bg-slate-100 hover:text-ink"
             onClick={onClose}
             aria-label="Закрити"
           >
@@ -37,10 +37,10 @@ export function CreateEmployeeModal({ hook, onClose }: Props) {
           </button>
         </div>
 
-        <div className="mx-[22px] border-t border-border" />
+        <div className="mx-5.5 border-t border-border" />
 
         <form
-          className="flex flex-col gap-4 px-[22px] pb-5 pt-4"
+          className="flex flex-col gap-4 px-22px pb-5 pt-4"
           onSubmit={(e) => {
             e.preventDefault()
             submit()
@@ -83,6 +83,7 @@ export function CreateEmployeeModal({ hook, onClose }: Props) {
               <option value="">Оберіть...</option>
               {units.map((u) => (
                 <option key={u.code} value={String(u.code)}>
+                  {'  '.repeat(u.depth)}
                   {u.name}
                 </option>
               ))}
@@ -123,7 +124,7 @@ export function CreateEmployeeModal({ hook, onClose }: Props) {
               Скасувати
             </Button>
             <Button type="submit" disabled={!canSubmit || isSubmitting}>
-              {isSubmitting ? 'Збереження…' : 'Підтвердити'}
+              {isSubmitting ? 'Призначення…' : 'Призначити'}
             </Button>
           </div>
         </form>

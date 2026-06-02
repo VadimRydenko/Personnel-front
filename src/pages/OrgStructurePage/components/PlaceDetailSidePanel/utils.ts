@@ -26,12 +26,13 @@ export const getCreateOrderBasis = (details: OrgPlaceDetails | undefined) => {
 
 export const getPlaceCardActions = (
   details: OrgPlaceDetails | undefined,
+  navigate: (path: string) => void,
 ): StackedActionButtonItem[] => {
   if (!details) return []
 
   if (details.status === 'vacant') {
     return [
-      { label: 'Призначити', variant: 'primary', disabled: true },
+      { label: 'Призначити', variant: 'primary', onClick: () => navigate('/documents/new') },
       { label: 'Скоротити', variant: 'outline', disabled: true },
     ]
   }
