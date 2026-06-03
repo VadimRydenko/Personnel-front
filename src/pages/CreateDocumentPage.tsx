@@ -1,10 +1,25 @@
-import { useQuery } from '@tanstack/react-query'
-import { Check, ChevronLeft, ChevronRight, FileText, HelpCircle, X } from 'lucide-react'
-import { useState } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { Check, ChevronLeft, ChevronRight, FileText, HelpCircle, Search, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { createDocument } from '../app/documentsApi'
 import { fetchEmployees } from '../app/employeesApi'
+import { fetchVacantPlaces } from '../app/orgStructureApi'
+import { queryClient } from '../app/queryClient'
 import { Button, Field, FieldInput, FieldLabel, FieldSelect, PageContent } from '../components/ui'
 import { cn } from '../lib/cn'
+
+const DOC_TYPES = [
+  { id: 'appointment', label: 'Призначення на посаду', category: 'Призначення' },
+  { id: 'vacation', label: 'Наказ про відпустку', category: 'Відпустки' },
+  { id: 'business_trip', label: 'Відрядження', category: 'Відрядження' },
+  { id: 'award', label: 'Відзнака', category: 'Відзнаки' },
+  { id: 'dismissal', label: 'Звільнення з посади', category: 'Накази' },
+  { id: 'order', label: 'Наказ', category: 'Накази' },
+  { id: 'other', label: 'Інше', category: 'Інше' },
+] as const
+
+type DocTypeId = (typeof DOC_TYPES)[number]['id']
 
 const WIZARD_STEPS = [
   { id: 1, label: 'Категорія' },
@@ -21,11 +36,20 @@ function formatUkDate(date: Date) {
   return `${d}.${m}.${y}`
 }
 
+function todayISO() {
+  const d = new Date()
+
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export function CreateDocumentPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [personId, setPersonId] = useState('')
   const [basis, setBasis] = useState('')
+  const [docType, setDocType] = useState<DocTypeId | ''>('')
+  const [placeCode, setPlaceCode] = useState<number | null>(null)
+  const [placeSearch, setPlaceSearch] = useState('')
 
   const employeesQuery = useQuery({
     queryKey: ['employees'],
@@ -33,12 +57,68 @@ export function CreateDocumentPage() {
   })
   const employees = employeesQuery.data?.items ?? []
 
-  const goBack = () => navigate('/documents')
-  const canProceed = step === 1 ? personId !== '' && basis.trim() !== '' : true
-  const selectedPerson = employees.find((e) => String(e.code) === personId)
+  const vacantPlacesQuery = useQuery({
+    queryKey: ['places', 'vacant'],
+    queryFn: fetchVacantPlaces,
+    enabled: step >= 3,
+  })
+  const allVacantPlaces = useMemo(
+    () => vacantPlacesQuery.data?.items ?? [],
+    [vacantPlacesQuery.data],
+  )
 
+  const filteredPlaces = useMemo(() => {
+    const q = placeSearch.trim().toLowerCase()
+
+    if (!q) return allVacantPlaces
+
+    return allVacantPlaces.filter((p) => {
+      const typeName = p.placeType?.val?.toLowerCase() ?? ''
+      const unitName = (p.orgUnit?.name ?? '').toLowerCase()
+
+      return typeName.includes(q) || unitName.includes(q)
+    })
+  }, [allVacantPlaces, placeSearch])
+
+  const selectedType = DOC_TYPES.find((t) => t.id === docType)
+  const selectedPerson = employees.find((e) => String(e.code) === personId)
+  const selectedPlace = allVacantPlaces.find((p) => p.code === placeCode)
+
+  const personFullName = selectedPerson
+    ? [selectedPerson.lastName, selectedPerson.firstName, selectedPerson.middleName]
+        .filter(Boolean)
+        .join(' ')
+    : 'особа не обрана'
+
+  const canProceed =
+    step === 1
+      ? personId !== '' && basis.trim() !== ''
+      : step === 2
+        ? docType !== ''
+        : step === 3
+          ? placeCode !== null
+          : true
+
+  const goBack = () => navigate('/documents')
   const nextStep = () => setStep((s) => Math.min(4, s + 1))
   const prevStep = () => setStep((s) => Math.max(1, s - 1))
+
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      createDocument({
+        number: `draft-${Date.now()}`,
+        date: todayISO(),
+        category: selectedType?.category ?? 'Інше',
+        typeLabel: selectedType?.label ?? 'Документ',
+        title: `${selectedType?.label ?? 'Документ'}${selectedPerson ? ': ' + personFullName : ''}`,
+        status: 'draft',
+        employeeCode: selectedPerson!.code,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] })
+      navigate('/documents')
+    },
+  })
 
   return (
     <PageContent flush className="relative flex min-h-0 flex-1 flex-col">
@@ -59,9 +139,11 @@ export function CreateDocumentPage() {
             </span>
             <div className="min-w-0">
               <h1 className="m-0 text-xl font-bold tracking-[-0.02em] text-ink">
-                Новий документ: Документ
+                Новий документ{selectedType ? `: ${selectedType.label}` : ''}
               </h1>
-              <p className="m-0 mt-0.5 text-sm text-muted">Інше</p>
+              <p className="m-0 mt-0.5 text-sm text-muted">
+                {selectedType?.category ?? 'Оберіть тип документа'}
+              </p>
             </div>
           </div>
         </div>
@@ -115,7 +197,6 @@ export function CreateDocumentPage() {
         {step === 1 && (
           <div className="mx-auto w-full max-w-[640px] rounded-lg border border-border bg-surface p-6 shadow-card">
             <h2 className="m-0 text-lg font-bold text-ink">Крок 1: Категорія</h2>
-
             <form
               className="mt-5 flex flex-col gap-4"
               onSubmit={(e) => {
@@ -159,14 +240,122 @@ export function CreateDocumentPage() {
         )}
 
         {step === 2 && (
-          <div className="mx-auto w-full max-w-[640px] rounded-lg border border-border bg-surface p-6 shadow-card">
-            <h2 className="m-0 text-lg font-bold text-ink">Крок 2: Тип</h2>
+          <div className="mx-auto w-full max-w-[640px]">
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+              <h2 className="m-0 text-lg font-bold text-ink">Крок 2: Тип документа</h2>
+              <p className="m-0 mt-1 text-sm text-muted">
+                Оберіть тип документа, який потрібно створити
+              </p>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                {DOC_TYPES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setDocType(t.id)}
+                    className={cn(
+                      'flex flex-col gap-1 rounded-lg border p-4 text-left transition-[background,border-color,box-shadow]',
+                      docType === t.id
+                        ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+                        : 'border-border bg-white text-ink hover:border-slate-400 hover:bg-slate-50',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'text-xs font-semibold uppercase tracking-wide',
+                        docType === t.id ? 'text-slate-300' : 'text-muted',
+                      )}
+                    >
+                      {t.category}
+                    </span>
+                    <span className="text-sm font-semibold">{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
         {step === 3 && (
-          <div className="mx-auto w-full max-w-[640px] rounded-lg border border-border bg-surface p-6 shadow-card">
-            <h2 className="m-0 text-lg font-bold text-ink">Крок 3: Параметри</h2>
+          <div className="mx-auto w-full max-w-[640px]">
+            <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+              <h2 className="m-0 text-lg font-bold text-ink">Крок 3: Параметри</h2>
+              <p className="m-0 mt-1 text-sm text-muted">
+                Оберіть вакантну посаду для прив'язки документа
+              </p>
+
+              <label className="mt-4 flex h-9 items-center gap-2 rounded-lg border border-border bg-white px-3">
+                <Search size={15} strokeWidth={2} className="shrink-0 text-muted" aria-hidden />
+                <input
+                  type="search"
+                  value={placeSearch}
+                  onChange={(e) => setPlaceSearch(e.target.value)}
+                  placeholder="Пошук посади або підрозділу…"
+                  className="min-w-0 flex-1 border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted"
+                />
+              </label>
+
+              <div className="mt-3 max-h-[360px] overflow-auto rounded-lg border border-border">
+                {vacantPlacesQuery.isLoading ? (
+                  <div className="px-4 py-8 text-center text-sm text-muted">Завантаження…</div>
+                ) : filteredPlaces.length === 0 ? (
+                  <div className="px-4 py-8 text-center text-sm text-muted">
+                    {placeSearch ? 'Нічого не знайдено' : 'Вакантних посад немає'}
+                  </div>
+                ) : (
+                  filteredPlaces.map((p) => {
+                    const posName = p.placeType?.val?.trim() || `Посада #${p.code}`
+                    const unitName = p.orgUnit?.name?.trim() || `Підрозділ #${p.orgUnitCode}`
+                    const isSelected = p.code === placeCode
+
+                    return (
+                      <button
+                        key={p.code}
+                        type="button"
+                        onClick={() => setPlaceCode(p.code)}
+                        className={cn(
+                          'flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left last:border-b-0 transition-colors',
+                          isSelected
+                            ? 'bg-slate-900 text-white'
+                            : 'bg-white text-ink hover:bg-slate-50',
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2',
+                            isSelected ? 'border-white' : 'border-slate-300',
+                          )}
+                        >
+                          {isSelected && <span className="h-2.5 w-2.5 rounded-full bg-white" />}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold">{posName}</div>
+                          <div
+                            className={cn(
+                              'truncate text-xs',
+                              isSelected ? 'text-slate-300' : 'text-muted',
+                            )}
+                          >
+                            {unitName}
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })
+                )}
+              </div>
+
+              {selectedPlace && (
+                <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <p className="m-0 text-sm font-semibold text-emerald-800">
+                    Обрано:{' '}
+                    {selectedPlace.placeType?.val?.trim() ?? `Посада #${selectedPlace.code}`}
+                  </p>
+                  <p className="m-0 mt-0.5 text-xs text-emerald-700">
+                    {selectedPlace.orgUnit?.name?.trim() ?? ''}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -187,20 +376,38 @@ export function CreateDocumentPage() {
                 </p>
 
                 <p className="m-0 mt-4 text-sm font-medium underline decoration-slate-400 underline-offset-2 text-ink">
-                  Про документ (
-                  {selectedPerson
-                    ? [selectedPerson.lastName, selectedPerson.firstName, selectedPerson.middleName]
-                        .filter(Boolean)
-                        .join(' ')
-                    : 'особа не обрана'}
-                  )
+                  {selectedType?.label ?? 'Документ'} ({personFullName})
                 </p>
+
+                {selectedPlace && (
+                  <p className="m-0 mt-2 text-sm text-muted">
+                    Посада:{' '}
+                    <span className="font-medium text-ink">
+                      {selectedPlace.placeType?.val?.trim()}
+                    </span>
+                    {selectedPlace.orgUnit?.name && ` — ${selectedPlace.orgUnit.name.trim()}`}
+                  </p>
+                )}
+
+                {basis && (
+                  <p className="m-0 mt-2 text-sm text-muted">
+                    Підстава: <span className="font-medium text-ink">{basis}</span>
+                  </p>
+                )}
 
                 <p className="m-0 mt-4 text-sm text-muted">
                   [Текст наказу буде автоматично сформовано після заповнення всіх полів]
                 </p>
               </div>
             </div>
+
+            {saveMutation.isError && (
+              <div className="rounded-lg border border-rose-200 bg-rose-50 px-5 py-4">
+                <p className="m-0 text-sm font-semibold text-rose-800">
+                  Помилка збереження: {(saveMutation.error as Error).message}
+                </p>
+              </div>
+            )}
 
             <div className="rounded-lg border border-blue-200 bg-blue-50 px-5 py-4">
               <p className="m-0 text-sm text-blue-800">
@@ -239,10 +446,17 @@ export function CreateDocumentPage() {
             <Button
               type="button"
               className="gap-1.5 bg-slate-900 border-slate-900 hover:border-slate-800 hover:bg-slate-800"
-              onClick={() => navigate('/documents')}
+              disabled={saveMutation.isPending}
+              onClick={() => saveMutation.mutate()}
             >
-              <Check size={18} strokeWidth={2.5} aria-hidden />
-              Зберегти як чернетку
+              {saveMutation.isPending ? (
+                'Збереження…'
+              ) : (
+                <>
+                  <Check size={18} strokeWidth={2.5} aria-hidden />
+                  Зберегти як чернетку
+                </>
+              )}
             </Button>
           )}
 

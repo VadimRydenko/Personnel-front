@@ -234,6 +234,19 @@ export async function createPlace(
   return body
 }
 
+export async function fetchVacantPlaces(): Promise<{ items: OrgPlace[] }> {
+  const res = await fetch(`${getApiBaseUrl()}/api/places/vacant`, {
+    credentials: 'include',
+  })
+  const body = await readJson(res)
+
+  if (!res.ok) throw new Error(getErrorMessage(body, res.status))
+
+  const data = body as { items?: OrgPlace[] }
+
+  return { items: data.items ?? [] }
+}
+
 export type AssignEmployeeToPlacePayload = {
   employeeCode: number
   validFrom: string

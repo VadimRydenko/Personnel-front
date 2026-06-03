@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import {
   ArrowUpDown,
   CalendarDays,
@@ -10,24 +11,9 @@ import {
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSession } from '../app/authClient'
+import { type DocStatus, fetchDocuments } from '../app/documentsApi'
 import { PageContent, PageTitle } from '../components/ui'
-import { useMe } from '../hooks/useMe'
 import { cn } from '../lib/cn'
-
-type DocStatus = 'draft' | 'review' | 'sign' | 'done' | 'cancelled'
-
-type DocumentRow = {
-  id: string
-  number: string
-  dateISO: string // YYYY-MM-DD
-  category: 'Усі категорії' | 'Накази' | 'Відпустки' | 'Відрядження' | 'Відзнаки' | 'Призначення'
-  typeLabel: string
-  title: string
-  status: DocStatus
-  author: string
-  needsMyAction?: boolean
-}
 
 const STATUS_LABEL: Record<DocStatus, string> = {
   draft: 'Чернетки',
@@ -45,113 +31,20 @@ const STATUS_BADGE_CLASS: Record<DocStatus, string> = {
   cancelled: 'bg-rose-100 text-rose-800',
 }
 
-const MOCK_DOCS: DocumentRow[] = [
-  {
-    id: 'd1',
-    number: '№142',
-    dateISO: '2018-09-01',
-    category: 'Призначення',
-    typeLabel: 'Призначення на посаду',
-    title: 'Призначення Іваненка О.М. на посаду начальника відділу',
-    status: 'done',
-    author: 'Коваленко П.М.',
-  },
-  {
-    id: 'd2',
-    number: '№112',
-    dateISO: '2015-03-01',
-    category: 'Призначення',
-    typeLabel: 'Призначення на посаду',
-    title: 'Призначення Литвина М.С. на посаду начальника сектору',
-    status: 'done',
-    author: 'Коваленко П.М.',
-  },
-  {
-    id: 'd3',
-    number: '№45/1',
-    dateISO: '2026-04-08',
-    category: 'Відпустки',
-    typeLabel: 'Відпустка',
-    title: 'Надання щорічної відпустки майору Шевченку Д.С.',
-    status: 'done',
-    author: 'Коваленко П.М.',
-  },
-  {
-    id: 'd4',
-    number: '№52/1',
-    dateISO: '2026-04-12',
-    category: 'Відрядження',
-    typeLabel: 'Відрядження',
-    title: 'Відрядження підполковника Литвина М.С. до інституту',
-    status: 'done',
-    author: 'Коваленко П.М.',
-  },
-  {
-    id: 'd5',
-    number: '№draft-001',
-    dateISO: '2026-04-13',
-    category: 'Призначення',
-    typeLabel: 'Призначення на посаду',
-    title: 'Призначення на вакантну посаду інспектора (підготовка)',
-    status: 'draft',
-    author: 'Коваленко П.М.',
-  },
-  {
-    id: 'd6',
-    number: '№47/2',
-    dateISO: '2026-04-10',
-    category: 'Відзнаки',
-    typeLabel: 'Відзнака',
-    title: 'Нагородження капітана Коваля П.М. відзнакою',
-    status: 'review',
-    author: 'Коваленко П.М.',
-    needsMyAction: true,
-  },
-  {
-    id: 'd7',
-    number: '№48/1',
-    dateISO: '2026-04-11',
-    category: 'Накази',
-    typeLabel: 'Звільнення з посади',
-    title: 'Звільнення з посади фахівця (завершення переведення)',
-    status: 'sign',
-    author: 'Коваленко П.М.',
-    needsMyAction: true,
-  },
-  {
-    id: 'd8',
-    number: '№49/1',
-    dateISO: '2026-05-26',
-    category: 'Відпустки',
-    typeLabel: 'Наказ про відпустку',
-    title: 'Наказ про відпустку сержанта Романюка І.І. (підписання)',
-    status: 'sign',
-    author: 'Петренко Л.В.',
-    needsMyAction: true,
-  },
-  {
-    id: 'd9',
-    number: '№draft-002',
-    dateISO: '2026-05-25',
-    category: 'Відпустки',
-    typeLabel: 'Наказ про відпустку',
-    title: 'Наказ про відпустку: погодження графіку на підрозділ',
-    status: 'draft',
-    author: 'Коваленко П.М.',
-  },
-]
-
 const formatUA = (iso: string) => {
-  const [y, m, d] = iso.split('-').map((x) => Number(x))
+  const date = iso.slice(0, 10) // YYYY-MM-DD
+  const [y, m, d] = date.split('-').map((x) => Number(x))
 
   if (!y || !m || !d) return iso
 
   return `${String(d).padStart(2, '0')}.${String(m).padStart(2, '0')}.${y}`
 }
 
+const toDateISO = (iso: string) => iso.slice(0, 10)
+
 const startOfWeekMonday = (date: Date) => {
   const d = new Date(date)
-  const day = d.getDay() // 0..6, 0 is Sunday
+  const day = d.getDay()
   const diff = (day + 6) % 7
 
   d.setHours(0, 0, 0, 0)
@@ -160,23 +53,31 @@ const startOfWeekMonday = (date: Date) => {
   return d
 }
 
+const CATEGORIES = [
+  'Усі категорії',
+  'Накази',
+  'Відпустки',
+  'Відрядження',
+  'Відзнаки',
+  'Призначення',
+  'Інше',
+] as const
+
+type Category = (typeof CATEGORIES)[number]
+
 export function DocumentsPage() {
   const navigate = useNavigate()
-  const session = useSession()
-  const me = useMe()
-  const currentUserLabel =
-    me.data?.name?.trim() ||
-    session.data?.user?.name?.trim() ||
-    session.data?.user?.email ||
-    'Коваленко П.М.'
 
   const [tab, setTab] = useState<'all' | DocStatus>('all')
   const [query, setQuery] = useState('')
-  const [category, setCategory] = useState<DocumentRow['category']>('Усі категорії')
-  const [preset, setPreset] = useState<
-    'none' | 'myDrafts' | 'thisWeek' | 'waitingMe' | 'vacationOrders'
-  >('none')
+  const [category, setCategory] = useState<Category>('Усі категорії')
+  const [preset, setPreset] = useState<'none' | 'thisWeek' | 'vacationOrders'>('none')
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
+
+  const docsQuery = useQuery({
+    queryKey: ['documents'],
+    queryFn: () => fetchDocuments({ pageSize: 200 }),
+  })
 
   const weekStart = useMemo(() => startOfWeekMonday(new Date()), [])
   const weekEnd = useMemo(() => {
@@ -190,39 +91,31 @@ export function DocumentsPage() {
   const normalizedQuery = query.trim().toLowerCase()
 
   const baseFiltered = useMemo(() => {
-    const matchesText = (row: DocumentRow) => {
-      if (!normalizedQuery) return true
+    const docs = docsQuery.data?.items ?? []
 
-      const hay = `${row.number} ${row.typeLabel} ${row.title} ${row.author}`.toLowerCase()
+    return docs.filter((row) => {
+      if (normalizedQuery) {
+        const hay = `${row.number} ${row.typeLabel} ${row.title}`.toLowerCase()
 
-      return hay.includes(normalizedQuery)
-    }
+        if (!hay.includes(normalizedQuery)) return false
+      }
 
-    const matchesCategory = (row: DocumentRow) =>
-      category === 'Усі категорії' || row.category === category
-
-    const matchesPreset = (row: DocumentRow) => {
-      if (preset === 'none') return true
-
-      if (preset === 'myDrafts') return row.status === 'draft' && row.author === currentUserLabel
-
-      if (preset === 'waitingMe') return Boolean(row.needsMyAction)
+      if (category !== 'Усі категорії' && row.category !== category) return false
 
       if (preset === 'vacationOrders') {
-        return row.category === 'Відпустки' || row.typeLabel.toLowerCase().includes('відпуст')
+        if (row.category !== 'Відпустки' && !row.typeLabel.toLowerCase().includes('відпуст'))
+          return false
       }
 
       if (preset === 'thisWeek') {
-        const dt = new Date(`${row.dateISO}T00:00:00`)
+        const dt = new Date(`${toDateISO(row.date)}T00:00:00`)
 
-        return dt >= weekStart && dt < weekEnd
+        if (dt < weekStart || dt >= weekEnd) return false
       }
 
       return true
-    }
-
-    return MOCK_DOCS.filter((r) => matchesText(r) && matchesCategory(r) && matchesPreset(r))
-  }, [category, currentUserLabel, normalizedQuery, preset, weekEnd, weekStart])
+    })
+  }, [docsQuery.data, category, normalizedQuery, preset, weekEnd, weekStart])
 
   const tabCounts = useMemo(() => {
     const counts: Record<'all' | DocStatus, number> = {
@@ -241,16 +134,15 @@ export function DocumentsPage() {
 
   const visibleRows = useMemo(() => {
     const rows = tab === 'all' ? baseFiltered : baseFiltered.filter((r) => r.status === tab)
-    const sorted = [...rows].sort((a, b) => {
-      const av = a.dateISO
-      const bv = b.dateISO
+
+    return [...rows].sort((a, b) => {
+      const av = toDateISO(a.date)
+      const bv = toDateISO(b.date)
 
       if (av === bv) return a.number.localeCompare(b.number, 'uk')
 
       return sortDir === 'desc' ? bv.localeCompare(av) : av.localeCompare(bv)
     })
-
-    return sorted
   }, [baseFiltered, sortDir, tab])
 
   const tabs: Array<{ id: 'all' | DocStatus; label: string }> = useMemo(
@@ -339,40 +231,28 @@ export function DocumentsPage() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Номер, тема, особа…"
+              placeholder="Номер, тема…"
               className="min-w-0 flex-1 border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted"
             />
           </label>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-white px-3.5 text-sm font-semibold text-ink hover:bg-slate-50"
-            >
-              Усі категорії{' '}
+            <label className="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-white px-3.5 text-sm font-semibold text-ink hover:bg-slate-50 cursor-pointer">
+              {category}
               <ChevronDown size={16} strokeWidth={2} aria-hidden className="text-muted" />
-            </button>
-            <select
-              className="sr-only"
-              value={category}
-              onChange={(e) => setCategory(e.target.value as DocumentRow['category'])}
-              aria-label="Категорія"
-            >
-              {(
-                [
-                  'Усі категорії',
-                  'Накази',
-                  'Відпустки',
-                  'Відрядження',
-                  'Відзнаки',
-                  'Призначення',
-                ] as const
-              ).map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              <select
+                className="absolute opacity-0 w-0 h-0"
+                value={category}
+                onChange={(e) => setCategory(e.target.value as Category)}
+                aria-label="Категорія"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <div className="ml-auto flex items-center gap-2">
@@ -405,20 +285,6 @@ export function DocumentsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            className={presetBtnClass(preset === 'myDrafts')}
-            onClick={() => setPreset((p) => (p === 'myDrafts' ? 'none' : 'myDrafts'))}
-          >
-            Мої чернетки
-          </button>
-          <button
-            type="button"
-            className={presetBtnClass(preset === 'waitingMe')}
-            onClick={() => setPreset((p) => (p === 'waitingMe' ? 'none' : 'waitingMe'))}
-          >
-            Очікують моєї дії
-          </button>
-          <button
-            type="button"
             className={presetBtnClass(preset === 'thisWeek')}
             onClick={() => setPreset((p) => (p === 'thisWeek' ? 'none' : 'thisWeek'))}
           >
@@ -442,8 +308,8 @@ export function DocumentsPage() {
 
       <div className="mt-4 overflow-hidden rounded-lg border border-border bg-surface">
         <div className="max-h-[min(70svh,560px)] overflow-auto">
-          <table className="w-full min-w-[860px] border-collapse">
-            <thead className="sticky top-0 z-[1] border-b border-border bg-slate-50/95 backdrop-blur-sm">
+          <table className="w-full min-w-180 border-collapse">
+            <thead className="sticky top-0 z-1 border-b border-border bg-slate-50/95 backdrop-blur-sm">
               <tr>
                 <th className={cn(thClass, 'w-10')}>
                   <span className="sr-only">Вибір</span>
@@ -452,16 +318,27 @@ export function DocumentsPage() {
                 <th className={cn(thClass, 'w-28')}>Дата</th>
                 <th className={thClass}>Тип / тема</th>
                 <th className={cn(thClass, 'w-36')}>Статус</th>
-                <th className={cn(thClass, 'w-44')}>Автор</th>
                 <th className={cn(thClass, 'w-10')}>
                   <span className="sr-only">Дії</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {visibleRows.length === 0 ? (
+              {docsQuery.isPending ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-10 text-center">
+                  <td colSpan={6} className="px-3 py-10 text-center text-sm text-muted">
+                    Завантаження…
+                  </td>
+                </tr>
+              ) : docsQuery.isError ? (
+                <tr>
+                  <td colSpan={6} className="px-3 py-10 text-center text-sm text-rose-600">
+                    Помилка завантаження: {docsQuery.error.message}
+                  </td>
+                </tr>
+              ) : visibleRows.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-3 py-10 text-center">
                     <p className="m-0 text-sm font-semibold text-ink">
                       Немає документів для поточного фільтра.
                     </p>
@@ -484,21 +361,12 @@ export function DocumentsPage() {
                       />
                     </td>
                     <td className={cn(tdClass, 'tabular-nums text-muted')}>{row.number}</td>
-                    <td className={cn(tdClass, 'tabular-nums text-muted')}>
-                      {formatUA(row.dateISO)}
-                    </td>
+                    <td className={cn(tdClass, 'tabular-nums text-muted')}>{formatUA(row.date)}</td>
                     <td className={tdClass}>
                       <div className="flex min-w-0 flex-col gap-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
-                            {row.typeLabel}
-                          </span>
-                          {row.needsMyAction ? (
-                            <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
-                              Потрібна дія
-                            </span>
-                          ) : null}
-                        </div>
+                        <span className="inline-flex w-fit rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
+                          {row.typeLabel}
+                        </span>
                         <div className="min-w-0 truncate font-medium">{row.title}</div>
                       </div>
                     </td>
@@ -512,7 +380,6 @@ export function DocumentsPage() {
                         {STATUS_LABEL[row.status]}
                       </span>
                     </td>
-                    <td className={cn(tdClass, 'text-muted')}>{row.author}</td>
                     <td className={cn(tdClass, 'text-right')}>
                       <button
                         type="button"
