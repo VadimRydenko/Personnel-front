@@ -3,12 +3,25 @@ import { cn } from '../../../lib/cn'
 import { STATUS_BADGE, STATUS_DOT, STATUS_LABEL, getAvatarColor, getInitials } from '../constants'
 import type { Person } from '../types'
 
-export function PersonnelRow({ person }: { person: Person }) {
+export function PersonnelRow({
+  person,
+  isSelected,
+  onSelect,
+}: {
+  person: Person
+  isSelected?: boolean
+  onSelect?: (person: Person) => void
+}) {
   const avatarColor = getAvatarColor(person.fullName)
   const initials = getInitials(person.lastName, person.firstName)
 
   return (
-    <tr className="border-b border-border last:border-b-0 hover:bg-slate-50/60">
+    <tr
+      className={cn(
+        'border-b border-border last:border-b-0',
+        isSelected ? 'bg-accent/5' : 'hover:bg-slate-50/60',
+      )}
+    >
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
@@ -57,6 +70,7 @@ export function PersonnelRow({ person }: { person: Person }) {
           <button
             type="button"
             className="rounded border border-accent/25 bg-accent/5 px-3 py-1 text-xs font-semibold text-accent transition hover:bg-accent/10"
+            onClick={() => onSelect?.(person)}
           >
             Картка
           </button>

@@ -24,8 +24,8 @@ export function CreateEmployeeModal({ hook, onClose }: Props) {
       aria-modal="true"
       aria-label="Новий співробітник"
     >
-      <div className="w-full max-w-105 overflow-hidden rounded-[22px] border border-border bg-surface shadow-[0_24px_80px_rgba(15,23,42,0.22)]">
-        <div className="flex items-center justify-between px-5.5 pb-3.5 pt-5">
+      <div className="w-full max-w-110 overflow-hidden rounded-[22px] border border-border bg-surface shadow-[0_24px_80px_rgba(15,23,42,0.22)]">
+        <div className="flex items-center justify-between px-8 pb-3.5 pt-5">
           <h2 className="m-0 text-2xl font-bold tracking-[-0.02em] text-ink">Новий співробітник</h2>
           <button
             type="button"
@@ -37,10 +37,10 @@ export function CreateEmployeeModal({ hook, onClose }: Props) {
           </button>
         </div>
 
-        <div className="mx-5.5 border-t border-border" />
+        <div className="mx-8 border-t border-border" />
 
         <form
-          className="flex flex-col gap-4 px-22px pb-5 pt-4"
+          className="flex flex-col gap-4 px-8 pb-5 pt-4"
           onSubmit={(e) => {
             e.preventDefault()
             submit()
@@ -117,7 +117,7 @@ export function CreateEmployeeModal({ hook, onClose }: Props) {
 
           {errorText ? <ErrorAlert>{errorText}</ErrorAlert> : null}
 
-          <div className="mx-[-22px] mt-1 border-t border-border" />
+          <div className="mx-[-32px] mt-1 border-t border-border" />
 
           <div className="flex justify-end gap-3 pt-1">
             <Button type="button" variant="secondary" onClick={onClose}>

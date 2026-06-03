@@ -74,6 +74,17 @@ export async function fetchEmployees(params?: {
   return body as EmployeesListResponse
 }
 
+export async function fetchEmployee(code: number): Promise<Employee> {
+  const res = await fetch(`${getApiBaseUrl()}/api/employees/${code}`, {
+    credentials: 'include',
+  })
+  const body = await readJson(res)
+
+  if (!res.ok) throw new Error(getErrorMessage(body, res.status))
+
+  return body as Employee
+}
+
 export async function createEmployee(payload: CreateEmployeePayload): Promise<Employee> {
   const res = await fetch(`${getApiBaseUrl()}/api/employees`, {
     method: 'POST',

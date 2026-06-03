@@ -10,13 +10,29 @@ import {
 } from '../constants'
 import type { Person } from '../types'
 
-export function PersonnelCard({ person }: { person: Person }) {
+export function PersonnelCard({
+  person,
+  isSelected,
+  onSelect,
+}: {
+  person: Person
+  isSelected?: boolean
+  onSelect?: (person: Person) => void
+}) {
   const avatarColor = getAvatarColor(person.fullName)
   const initials = getInitials(person.lastName, person.firstName)
 
   return (
-    <div className="flex flex-col rounded-lg border border-border bg-surface shadow-card">
-      <div className="flex flex-1 flex-col gap-3 p-4">
+    <div
+      className={cn(
+        'flex flex-col rounded-lg border bg-surface shadow-card transition-colors',
+        isSelected ? 'border-accent ring-1 ring-accent/30' : 'border-border',
+      )}
+    >
+      <div
+        className="flex flex-1 cursor-pointer flex-col gap-3 p-4"
+        onClick={() => onSelect?.(person)}
+      >
         <div className="flex items-start gap-3">
           <div className="relative shrink-0">
             <div
@@ -69,6 +85,7 @@ export function PersonnelCard({ person }: { person: Person }) {
         <button
           type="button"
           className="flex-1 rounded border border-accent/25 bg-accent/5 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent/10"
+          onClick={() => onSelect?.(person)}
         >
           Картка
         </button>

@@ -5,6 +5,7 @@ import { fetchEmployees, type Employee } from '../../../app/employeesApi'
 import { PageContent, PageTitle } from '../../../components/ui'
 import { cn } from '../../../lib/cn'
 import { CreateEmployeeModal } from '../components/CreateEmployeeModal'
+import { EmployeeDetailSidePanel } from '../components/EmployeeDetailSidePanel'
 import { PersonnelCard } from '../components/PersonnelCard'
 import { PersonnelRow } from '../components/PersonnelRow'
 import { FILTER_TABS, STAT_LABELS, STAT_ORDER, STATUS_DOT } from '../constants'
@@ -31,6 +32,7 @@ export function PersonnelPage() {
   const [query, setQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null)
   const createEmployeeHook = useCreateEmployee(() => setIsModalOpen(false))
 
   const employeesQuery = useQuery({
@@ -85,6 +87,10 @@ export function PersonnelPage() {
         : 'border-border bg-white text-muted hover:bg-slate-50 hover:text-ink',
     )
 
+  const handleSelectPerson = (person: Person) => {
+    setSelectedPerson((prev) => (prev?.id === person.id ? null : person))
+  }
+
   return (
     <PageContent>
       {/* Header */}
@@ -133,7 +139,7 @@ export function PersonnelPage() {
 
       {/* Toolbar */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <label className="flex h-9 min-w-[200px] max-w-[280px] flex-1 items-center gap-2 rounded-full border border-border bg-white px-3.5">
+        <label className="flex h-9 min-w-50 max-w-70 flex-1 items-center gap-2 rounded-full border border-border bg-white px-3.5">
           <Search size={15} strokeWidth={2} className="shrink-0 text-muted" aria-hidden />
           <input
             type="search"
@@ -195,12 +201,17 @@ export function PersonnelPage() {
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {visible.map((person) => (
-              <PersonnelCard key={person.id} person={person} />
+              <PersonnelCard
+                key={person.id}
+                person={person}
+                isSelected={selectedPerson?.id === person.id}
+                onSelect={handleSelectPerson}
+              />
             ))}
           </div>
         ) : (
           <div className="overflow-hidden rounded-lg border border-border bg-surface">
-            <table className="w-full min-w-[700px] border-collapse">
+            <table className="w-full min-w-175 border-collapse">
               <thead className="border-b border-border bg-slate-50/95">
                 <tr>
                   {['ПІБ', 'Посада', 'Звання', 'Підрозділ', 'Статус', ''].map((h) => (
@@ -215,13 +226,22 @@ export function PersonnelPage() {
               </thead>
               <tbody>
                 {visible.map((person) => (
-                  <PersonnelRow key={person.id} person={person} />
+                  <PersonnelRow
+                    key={person.id}
+                    person={person}
+                    isSelected={selectedPerson?.id === person.id}
+                    onSelect={handleSelectPerson}
+                  />
                 ))}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {selectedPerson && (
+        <EmployeeDetailSidePanel person={selectedPerson} onClose={() => setSelectedPerson(null)} />
+      )}
 
       {isModalOpen && (
         <CreateEmployeeModal hook={createEmployeeHook} onClose={() => setIsModalOpen(false)} />
