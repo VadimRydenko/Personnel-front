@@ -1,13 +1,8 @@
-import { useSession } from '../app/authClient'
-import { getDisplayFirstName } from '../app/displayName'
-import { PageContent } from '../components/ui'
-import { useMe } from '../hooks/useMe'
+import { PageContent } from '../../components/ui'
+import { useHomePage } from './useHomePage'
 
 export const HomePage = () => {
-  const session = useSession()
-  const me = useMe()
-  const user = session.data?.user
-  const firstName = user ? getDisplayFirstName(me.data?.name ?? user.name, user.email) : 'колега'
+  const { firstName } = useHomePage()
 
   return (
     <PageContent>

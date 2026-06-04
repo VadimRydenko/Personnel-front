@@ -1,7 +1,3 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
-import { createManagedUser, fetchAdminCatalog } from '../app/meApi'
-import { queryClient } from '../app/queryClient'
 import {
   AdminSubNav,
   Button,
@@ -13,50 +9,27 @@ import {
   FieldInput,
   Muted,
   PageContent,
-} from '../components/ui'
+} from '../../components/ui'
+import { useAdminUsersPage } from './useAdminUsersPage'
 
 export const AdminUsersPage = () => {
-  const catalog = useQuery({
-    queryKey: ['admin-catalog'],
-    queryFn: fetchAdminCatalog,
-  })
-
-  const [email, setEmail] = useState('')
-  const [name, setName] = useState('')
-  const [roleIds, setRoleIds] = useState<number[]>([])
-  const [groupIds, setGroupIds] = useState<string[]>([])
-  const [permissionIds, setPermissionIds] = useState<string[]>([])
-  const [created, setCreated] = useState<{ email: string; temporaryPassword: string } | null>(null)
-
-  const createMutation = useMutation({
-    mutationFn: createManagedUser,
-    onSuccess: (data) => {
-      setCreated({ email: data.email, temporaryPassword: data.temporaryPassword })
-      void queryClient.invalidateQueries({ queryKey: ['admin-catalog'] })
-    },
-  })
-
-  const canSubmit = useMemo(() => email.trim().length > 3 && roleIds.length > 0, [email, roleIds])
-
-  const toggleNumber = (list: number[], value: number) => {
-    return list.includes(value) ? list.filter((x) => x !== value) : [...list, value]
-  }
-
-  const toggleString = (list: string[], value: string) => {
-    return list.includes(value) ? list.filter((x) => x !== value) : [...list, value]
-  }
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setCreated(null)
-    await createMutation.mutateAsync({
-      email: email.trim(),
-      name: name.trim() || undefined,
-      roleIds,
-      groupIds,
-      permissionIds,
-    })
-  }
+  const {
+    catalog,
+    email,
+    setEmail,
+    name,
+    setName,
+    roleIds,
+    setRoleIds,
+    groupIds,
+    setGroupIds,
+    permissionIds,
+    setPermissionIds,
+    created,
+    createMutation,
+    canSubmit,
+    onSubmit,
+  } = useAdminUsersPage()
 
   if (catalog.isPending) {
     return (
@@ -82,7 +55,7 @@ export const AdminUsersPage = () => {
         <CardTitle>Створення облікового запису</CardTitle>
         <Muted>
           Призначте ролі, групи та прямі повноваження. Система згенерує тимчасовий пароль і
-          встановить обов’язкову зміну пароля при першому вході.
+          встановить обов'язкову зміну пароля при першому вході.
         </Muted>
 
         <Divider />
@@ -113,7 +86,7 @@ export const AdminUsersPage = () => {
           </Field>
 
           <Field>
-            <span className="text-[0.85rem] font-medium text-ink">Ім’я (необов’язково)</span>
+            <span className="text-[0.85rem] font-medium text-ink">Ім'я (необов'язково)</span>
             <FieldInput value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
 
@@ -125,7 +98,7 @@ export const AdminUsersPage = () => {
                   <input
                     type="checkbox"
                     checked={roleIds.includes(r.id)}
-                    onChange={() => setRoleIds((prev) => toggleNumber(prev, r.id))}
+                    onChange={() => setRoleIds(r.id)}
                   />
                   <span>
                     {r.roleName} <small className="text-muted">{r.notes ?? ''}</small>
@@ -143,7 +116,7 @@ export const AdminUsersPage = () => {
                   <input
                     type="checkbox"
                     checked={groupIds.includes(g.id)}
-                    onChange={() => setGroupIds((prev) => toggleString(prev, g.id))}
+                    onChange={() => setGroupIds(g.id)}
                   />
                   <span>
                     {g.name} <small className="text-muted">({g.slug})</small>
@@ -161,7 +134,7 @@ export const AdminUsersPage = () => {
                   <input
                     type="checkbox"
                     checked={permissionIds.includes(p.id)}
-                    onChange={() => setPermissionIds((prev) => toggleString(prev, p.id))}
+                    onChange={() => setPermissionIds(p.id)}
                   />
                   <span>
                     {p.code} — {p.label}

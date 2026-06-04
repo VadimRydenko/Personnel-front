@@ -1,117 +1,43 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
 import { Check, ChevronLeft, ChevronRight, FileText, HelpCircle, Search, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { createDocument } from '../app/documentsApi'
-import { formatUkDate } from '../lib/dateUtils'
-import { fetchEmployees } from '../app/employeesApi'
-import { fetchVacantPlaces } from '../app/orgStructureApi'
-import { queryClient } from '../app/queryClient'
-import { Button, Field, FieldInput, FieldLabel, FieldSelect, PageContent } from '../components/ui'
-import { cn } from '../lib/cn'
-
-const DOC_TYPES = [
-  { id: 'appointment', label: 'Призначення на посаду', category: 'Призначення' },
-  { id: 'vacation', label: 'Наказ про відпустку', category: 'Відпустки' },
-  { id: 'business_trip', label: 'Відрядження', category: 'Відрядження' },
-  { id: 'award', label: 'Відзнака', category: 'Відзнаки' },
-  { id: 'dismissal', label: 'Звільнення з посади', category: 'Накази' },
-  { id: 'order', label: 'Наказ', category: 'Накази' },
-  { id: 'other', label: 'Інше', category: 'Інше' },
-] as const
-
-type DocTypeId = (typeof DOC_TYPES)[number]['id']
-
-const WIZARD_STEPS = [
-  { id: 1, label: 'Категорія' },
-  { id: 2, label: 'Тип' },
-  { id: 3, label: 'Параметри' },
-  { id: 4, label: "Прев'ю" },
-] as const
-
-const todayISO = () => {
-  const d = new Date()
-
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
+import { formatUkDate } from '../../lib/dateUtils'
+import { cn } from '../../lib/cn'
+import {
+  Button,
+  Field,
+  FieldInput,
+  FieldLabel,
+  FieldSelect,
+  PageContent,
+} from '../../components/ui'
+import { DOC_TYPES, WIZARD_STEPS } from './constants'
+import { useCreateDocumentPage } from './useCreateDocumentPage'
 
 export const CreateDocumentPage = () => {
-  const navigate = useNavigate()
-  const [step, setStep] = useState(1)
-  const [personId, setPersonId] = useState('')
-  const [basis, setBasis] = useState('')
-  const [docType, setDocType] = useState<DocTypeId | ''>('')
-  const [placeCode, setPlaceCode] = useState<number | null>(null)
-  const [placeSearch, setPlaceSearch] = useState('')
-
-  const employeesQuery = useQuery({
-    queryKey: ['employees'],
-    queryFn: () => fetchEmployees({ pageSize: 100 }),
-  })
-  const employees = employeesQuery.data?.items ?? []
-
-  const vacantPlacesQuery = useQuery({
-    queryKey: ['places', 'vacant'],
-    queryFn: fetchVacantPlaces,
-    enabled: step >= 3,
-  })
-  const allVacantPlaces = useMemo(
-    () => vacantPlacesQuery.data?.items ?? [],
-    [vacantPlacesQuery.data],
-  )
-
-  const filteredPlaces = useMemo(() => {
-    const q = placeSearch.trim().toLowerCase()
-
-    if (!q) return allVacantPlaces
-
-    return allVacantPlaces.filter((p) => {
-      const typeName = p.placeType?.val?.toLowerCase() ?? ''
-      const unitName = (p.orgUnit?.name ?? '').toLowerCase()
-
-      return typeName.includes(q) || unitName.includes(q)
-    })
-  }, [allVacantPlaces, placeSearch])
-
-  const selectedType = DOC_TYPES.find((t) => t.id === docType)
-  const selectedPerson = employees.find((e) => String(e.code) === personId)
-  const selectedPlace = allVacantPlaces.find((p) => p.code === placeCode)
-
-  const personFullName = selectedPerson
-    ? [selectedPerson.lastName, selectedPerson.firstName, selectedPerson.middleName]
-        .filter(Boolean)
-        .join(' ')
-    : 'особа не обрана'
-
-  const canProceed =
-    step === 1
-      ? personId !== '' && basis.trim() !== ''
-      : step === 2
-        ? docType !== ''
-        : step === 3
-          ? placeCode !== null
-          : true
-
-  const goBack = () => navigate('/documents')
-  const nextStep = () => setStep((s) => Math.min(4, s + 1))
-  const prevStep = () => setStep((s) => Math.max(1, s - 1))
-
-  const saveMutation = useMutation({
-    mutationFn: () =>
-      createDocument({
-        number: `draft-${Date.now()}`,
-        date: todayISO(),
-        category: selectedType?.category ?? 'Інше',
-        typeLabel: selectedType?.label ?? 'Документ',
-        title: `${selectedType?.label ?? 'Документ'}${selectedPerson ? ': ' + personFullName : ''}`,
-        status: 'draft',
-        employeeCode: selectedPerson!.code,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] })
-      navigate('/documents')
-    },
-  })
+  const {
+    step,
+    personId,
+    setPersonId,
+    basis,
+    setBasis,
+    docType,
+    setDocType,
+    placeCode,
+    setPlaceCode,
+    placeSearch,
+    setPlaceSearch,
+    employeesQuery,
+    employees,
+    vacantPlacesQuery,
+    filteredPlaces,
+    selectedType,
+    selectedPlace,
+    personFullName,
+    canProceed,
+    goBack,
+    nextStep,
+    prevStep,
+    saveMutation,
+  } = useCreateDocumentPage()
 
   return (
     <PageContent flush className="relative flex min-h-0 flex-1 flex-col">
@@ -169,11 +95,9 @@ export const CreateDocumentPage = () => {
                   <span
                     className={cn(
                       'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold tabular-nums',
-                      isActive
+                      isActive || isPast
                         ? 'bg-slate-900 text-white'
-                        : isPast
-                          ? 'bg-slate-900 text-white'
-                          : 'bg-slate-100 text-slate-500',
+                        : 'bg-slate-100 text-slate-500',
                     )}
                   >
                     {isPast ? <Check size={13} strokeWidth={2.5} aria-hidden /> : s.id}
@@ -190,12 +114,7 @@ export const CreateDocumentPage = () => {
         {step === 1 && (
           <div className="mx-auto w-full max-w-[640px] rounded-lg border border-border bg-surface p-6 shadow-card">
             <h2 className="m-0 text-lg font-bold text-ink">Крок 1: Категорія</h2>
-            <form
-              className="mt-5 flex flex-col gap-4"
-              onSubmit={(e) => {
-                e.preventDefault()
-              }}
-            >
+            <form className="mt-5 flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
               <Field>
                 <FieldLabel>Особа</FieldLabel>
                 <FieldSelect
