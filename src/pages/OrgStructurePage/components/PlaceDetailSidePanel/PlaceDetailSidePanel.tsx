@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
-import { ErrorAlert, StackedActionButtons, Muted } from '../../../../components/ui'
+import { ErrorAlert, Muted, StackedActionButtons, TabPlaceholder } from '../../../../components/ui'
 import { cn } from '../../../../lib/cn'
 import type { OrgStructurePageState } from '../../state/useOrgStructurePage'
 import { DETAIL_TABS, statusBadgeClass } from './constants'
@@ -12,7 +12,6 @@ import {
   VacantAttributesTab,
 } from './tabs/AttributesTabs'
 import { OccupiedCurrentStateTab, VacantCurrentStateTab } from './tabs/CurrentStateTabs'
-import { TabPlaceholder } from './TabsPlaceholders'
 
 const PanelHeader = ({ onClose }: { onClose: () => void }) => (
   <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-5 py-4">

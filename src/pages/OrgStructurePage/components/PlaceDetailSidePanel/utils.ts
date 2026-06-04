@@ -1,16 +1,8 @@
 import type { StackedActionButtonItem } from '../../../../components/ui'
 import type { OrgPlaceDetails } from '../../../../app/orgStructureApi'
+import { formatUkDate } from '../../../../lib/dateUtils'
 
-export const formatUkDate = (iso: string | null | undefined) => {
-  if (!iso) return '—'
-
-  const part = iso.split('T')[0]
-  const [y, m, d] = part.split('-')
-
-  if (!y || !m || !d) return '—'
-
-  return `${d}.${m}.${y}`
-}
+export { formatUkDate }
 
 export const getCreateOrderBasis = (details: OrgPlaceDetails | undefined) => {
   const order = details?.createOrder

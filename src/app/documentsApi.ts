@@ -1,14 +1,5 @@
 import { getApiBaseUrl } from './api'
-import { readJson } from './apiUtils'
-
-const getErrorMessage = (body: unknown, status: number) => {
-  return typeof body === 'object' &&
-    body !== null &&
-    'message' in body &&
-    typeof (body as { message: unknown }).message === 'string'
-    ? (body as { message: string }).message
-    : `Request failed (${status})`
-}
+import { getErrorMessage, readJson } from './apiUtils'
 
 export type DocStatus = 'draft' | 'review' | 'sign' | 'done' | 'cancelled'
 

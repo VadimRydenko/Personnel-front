@@ -1,5 +1,5 @@
 import { Muted } from '../../../../../components/ui'
-import { AttributeRow } from '../AttributeRow'
+import { AttributeRow } from '../../AttributeRow'
 import type { PlaceDetailsTabProps } from '../types'
 import { formatUkDate, getCreateOrderBasis } from '../utils'
 

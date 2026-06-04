@@ -2,8 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { X } from 'lucide-react'
 import { useState } from 'react'
 import { fetchEmployee } from '../../../app/employeesApi'
-import { Muted } from '../../../components/ui'
+import { Muted, TabPlaceholder } from '../../../components/ui'
 import { cn } from '../../../lib/cn'
+import { formatUkDate } from '../../../lib/dateUtils'
 import { STATUS_BADGE, STATUS_DOT, STATUS_LABEL, getAvatarColor, getInitials } from '../constants'
 import type { Person } from '../types'
 
@@ -19,17 +20,6 @@ const PANEL_TABS: { id: PanelTab; label: string }[] = [
 ]
 
 const ACTION_BUTTONS = ['Звільнити', 'Перевести', 'Відпустка', 'Відрядження', 'Видати довідку']
-
-const formatDate = (iso: string | null | undefined) => {
-  if (!iso) return '—'
-
-  const part = iso.split('T')[0]
-  const [y, m, d] = part.split('-')
-
-  if (!y || !m || !d) return '—'
-
-  return `${d}.${m}.${y}`
-}
 
 const formatSex = (sex: string | undefined) => {
   if (sex === 'М' || sex === 'M' || sex === 'м') return 'Чоловіча'
@@ -50,10 +40,6 @@ const SectionHeading = ({ children }: { children: React.ReactNode }) => (
   <p className="mb-0 mt-5 text-[0.68rem] font-bold uppercase tracking-widest text-muted first:mt-4">
     {children}
   </p>
-)
-
-const TabPlaceholder = ({ title }: { title: string }) => (
-  <Muted className="py-8 text-center">{title} (незабаром)</Muted>
 )
 
 export const EmployeeDetailSidePanel = ({
@@ -178,7 +164,7 @@ export const EmployeeDetailSidePanel = ({
               <>
                 <SectionHeading>Загальна інформація</SectionHeading>
                 <InfoRow label="Повне ПІБ" value={person.fullName} />
-                <InfoRow label="Дата народження" value={formatDate(emp?.birthday)} />
+                <InfoRow label="Дата народження" value={formatUkDate(emp?.birthday)} />
                 <InfoRow label="Місце народження" value="—" />
                 <InfoRow label="Стать" value={formatSex(emp?.sex)} />
 

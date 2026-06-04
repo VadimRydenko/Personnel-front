@@ -1,8 +1,11 @@
 import { X } from 'lucide-react'
-import { ErrorAlert, Muted, StackedActionButtons } from '../../../components/ui'
+import { ErrorAlert, Muted, StackedActionButtons, TabPlaceholder } from '../../../components/ui'
 import { cn } from '../../../lib/cn'
+import { formatUkDate } from '../../../lib/dateUtils'
 import type { OrgUnitDetails } from '../../../app/orgStructureApi'
 import type { DetailCardTab, OrgStructurePageState } from '../state/useOrgStructurePage'
+import { formatPathCode } from './utils'
+import { AttributeRow } from './AttributeRow'
 
 const DETAIL_TABS: { id: DetailCardTab; label: string }[] = [
   { id: 'attributes', label: 'Атрибути' },
@@ -10,20 +13,6 @@ const DETAIL_TABS: { id: DetailCardTab; label: string }[] = [
   { id: 'documents', label: 'Документи' },
   { id: 'history', label: 'Історія' },
 ]
-
-const formatUkDate = (iso: string | null | undefined) => {
-  if (!iso) return '—'
-
-  const part = iso.split('T')[0]
-  const [y, m, d] = part.split('-')
-
-  if (!y || !m || !d) return '—'
-
-  return `${d}.${m}.${y}`
-}
-
-const formatPathCode = (pathSortOrders: number[]) =>
-  pathSortOrders.map((n) => String(n).padStart(3, '0')).join('-')
 
 const shortNameFromUnit = (name: string | undefined) => {
   if (!name?.trim()) return '—'
@@ -39,13 +28,6 @@ const shortNameFromUnit = (name: string | undefined) => {
     .join('')
     .toUpperCase()
 }
-
-const AttributeRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-start justify-between gap-4 border-b border-border py-3 last:border-b-0">
-    <span className="shrink-0 text-sm text-muted">{label}</span>
-    <span className="min-w-0 text-right text-sm font-semibold text-ink">{value}</span>
-  </div>
-)
 
 const AttributeBlock = ({ label, value }: { label: string; value: string }) => (
   <div className="border-b border-border py-3 last:border-b-0">
@@ -101,10 +83,6 @@ const AttributesTab = ({
     </div>
   )
 }
-
-const TabPlaceholder = ({ title }: { title: string }) => (
-  <Muted className="py-8 text-center">{title} (незабаром)</Muted>
-)
 
 export const UnitDetailSidePanel = ({ state }: { state: OrgStructurePageState }) => {
   const pathSortOrders = state.selectedBreadcrumbs.map((c) => c.sortOrder)

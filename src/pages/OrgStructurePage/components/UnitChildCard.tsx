@@ -2,9 +2,7 @@ import type { ReactNode } from 'react'
 import { Folder, MapPin, Users } from 'lucide-react'
 import { cn } from '../../../lib/cn'
 import type { TreeNode } from '../state/tree'
-
-const formatPathCode = (pathSortOrders: number[]) =>
-  pathSortOrders.map((n) => String(n).padStart(3, '0')).join('-')
+import { formatPathCode } from './utils'
 
 export const UnitChildCard = ({
   unit,

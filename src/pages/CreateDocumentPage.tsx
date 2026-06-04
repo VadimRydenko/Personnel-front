@@ -3,6 +3,7 @@ import { Check, ChevronLeft, ChevronRight, FileText, HelpCircle, Search, X } fro
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createDocument } from '../app/documentsApi'
+import { formatUkDate } from '../lib/dateUtils'
 import { fetchEmployees } from '../app/employeesApi'
 import { fetchVacantPlaces } from '../app/orgStructureApi'
 import { queryClient } from '../app/queryClient'
@@ -27,14 +28,6 @@ const WIZARD_STEPS = [
   { id: 3, label: 'Параметри' },
   { id: 4, label: "Прев'ю" },
 ] as const
-
-const formatUkDate = (date: Date) => {
-  const d = String(date.getDate()).padStart(2, '0')
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const y = date.getFullYear()
-
-  return `${d}.${m}.${y}`
-}
 
 const todayISO = () => {
   const d = new Date()
@@ -372,7 +365,7 @@ export const CreateDocumentPage = () => {
                   Наказ Голова Держспецзв'язку
                 </p>
                 <p className="m-0 mt-1 text-sm text-muted">
-                  від {formatUkDate(new Date())} (проект)
+                  від {formatUkDate(new Date().toISOString())} (проект)
                 </p>
 
                 <p className="m-0 mt-4 text-sm font-medium underline decoration-slate-400 underline-offset-2 text-ink">
