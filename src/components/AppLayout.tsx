@@ -17,7 +17,7 @@ const sidebarNavLinkClass = (isActive: boolean) =>
       : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-foreground',
   )
 
-export function AppLayout() {
+export const AppLayout = () => {
   const session = useSession()
   const me = useMe()
   const location = useLocation()

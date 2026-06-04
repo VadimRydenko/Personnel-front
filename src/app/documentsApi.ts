@@ -1,18 +1,7 @@
 import { getApiBaseUrl } from './api'
+import { readJson } from './apiUtils'
 
-async function readJson(res: Response): Promise<unknown> {
-  const text = await res.text()
-
-  if (!text) return undefined
-
-  try {
-    return JSON.parse(text) as unknown
-  } catch {
-    return { text }
-  }
-}
-
-function getErrorMessage(body: unknown, status: number) {
+const getErrorMessage = (body: unknown, status: number) => {
   return typeof body === 'object' &&
     body !== null &&
     'message' in body &&
@@ -55,14 +44,14 @@ export type DocumentsListResponse = {
   total: number
 }
 
-export async function fetchDocuments(params?: {
+export const fetchDocuments = async (params?: {
   q?: string
   page?: number
   pageSize?: number
   status?: DocStatus
   employeeCode?: number
   employeePlaceCode?: number
-}): Promise<DocumentsListResponse> {
+}): Promise<DocumentsListResponse> => {
   const sp = new URLSearchParams()
 
   if (params?.q) sp.set('q', params.q)
@@ -88,7 +77,7 @@ export async function fetchDocuments(params?: {
   return body as DocumentsListResponse
 }
 
-export async function fetchDocument(id: string): Promise<Document> {
+export const fetchDocument = async (id: string): Promise<Document> => {
   const res = await fetch(`${getApiBaseUrl()}/api/documents/${id}`, {
     credentials: 'include',
   })
@@ -99,7 +88,7 @@ export async function fetchDocument(id: string): Promise<Document> {
   return body as Document
 }
 
-export async function createDocument(payload: CreateDocumentPayload): Promise<Document> {
+export const createDocument = async (payload: CreateDocumentPayload): Promise<Document> => {
   const res = await fetch(`${getApiBaseUrl()}/api/documents`, {
     method: 'POST',
     credentials: 'include',

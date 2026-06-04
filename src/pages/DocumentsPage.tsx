@@ -75,7 +75,7 @@ const PANEL_TABS: { id: PanelTab; label: string }[] = [
   { id: 'journal', label: 'Журнал' },
 ]
 
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
+const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) => {
   return (
     <div className="flex items-start gap-2 py-2.5 border-b border-border last:border-b-0">
       <span className="w-36 shrink-0 text-xs text-muted">{label}</span>
@@ -84,7 +84,7 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
   )
 }
 
-function DocumentPanel({ doc, onClose }: { doc: Document; onClose: () => void }) {
+const DocumentPanel = ({ doc, onClose }: { doc: Document; onClose: () => void }) => {
   const [tab, setTab] = useState<PanelTab>('details')
 
   return (
@@ -203,7 +203,7 @@ function DocumentPanel({ doc, onClose }: { doc: Document; onClose: () => void })
   )
 }
 
-export function DocumentsPage() {
+export const DocumentsPage = () => {
   const navigate = useNavigate()
 
   const [tab, setTab] = useState<'all' | DocStatus>('all')

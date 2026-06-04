@@ -9,10 +9,10 @@ import {
 } from '../../../app/orgStructureApi'
 import { queryClient } from '../../../app/queryClient'
 
-function flattenTree(
+const flattenTree = (
   nodes: OrgUnitTreeNode[],
   depth = 0,
-): Array<OrgUnitTreeNode & { depth: number }> {
+): Array<OrgUnitTreeNode & { depth: number }> => {
   return nodes.flatMap((node) => [{ ...node, depth }, ...flattenTree(node.children, depth + 1)])
 }
 
@@ -34,7 +34,7 @@ const emptyForm = (): CreateEmployeeFormState => ({
   hireDate: '',
 })
 
-export function useCreateEmployee(onSuccess: () => void) {
+export const useCreateEmployee = (onSuccess: () => void) => {
   const [form, setFormState] = useState<CreateEmployeeFormState>(emptyForm)
   const [errorText, setErrorText] = useState<string | null>(null)
 
@@ -51,10 +51,10 @@ export function useCreateEmployee(onSuccess: () => void) {
     enabled: selectedUnitCode !== null,
   })
 
-  function setField<K extends keyof CreateEmployeeFormState>(
+  const setField = <K extends keyof CreateEmployeeFormState>(
     key: K,
     value: CreateEmployeeFormState[K],
-  ) {
+  ) => {
     setFormState((prev) => {
       const next = { ...prev, [key]: value }
 
@@ -100,7 +100,7 @@ export function useCreateEmployee(onSuccess: () => void) {
 
   const canSubmit = form.lastName.trim().length > 0 && form.firstName.trim().length > 0
 
-  function submit() {
+  const submit = () => {
     if (!canSubmit) return
 
     if (!form.unitCode) {

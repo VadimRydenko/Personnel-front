@@ -14,7 +14,7 @@ type Props = {
   onClose: () => void
 }
 
-export function CreateEmployeeModal({ hook, onClose }: Props) {
+export const CreateEmployeeModal = ({ hook, onClose }: Props) => {
   const { form, setField, units, places, canSubmit, errorText, isSubmitting, submit } = hook
 
   return (

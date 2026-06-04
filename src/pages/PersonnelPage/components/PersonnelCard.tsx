@@ -10,7 +10,7 @@ import {
 } from '../constants'
 import type { Person } from '../types'
 
-export function PersonnelCard({
+export const PersonnelCard = ({
   person,
   isSelected,
   onSelect,
@@ -18,7 +18,7 @@ export function PersonnelCard({
   person: Person
   isSelected?: boolean
   onSelect?: (person: Person) => void
-}) {
+}) => {
   const avatarColor = getAvatarColor(person.fullName)
   const initials = getInitials(person.lastName, person.firstName)
 

@@ -5,7 +5,7 @@ import { hasSecurityAdminRole } from '../app/securityAdmin'
 import { useMe } from '../hooks/useMe'
 import { Muted } from './ui'
 
-export function RequireAuth(props: { children: ReactNode; adminOnly?: boolean | undefined }) {
+export const RequireAuth = (props: { children: ReactNode; adminOnly?: boolean | undefined }) => {
   const session = useSession()
   const me = useMe()
   const location = useLocation()

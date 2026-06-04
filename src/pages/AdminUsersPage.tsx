@@ -15,7 +15,7 @@ import {
   PageContent,
 } from '../components/ui'
 
-export function AdminUsersPage() {
+export const AdminUsersPage = () => {
   const catalog = useQuery({
     queryKey: ['admin-catalog'],
     queryFn: fetchAdminCatalog,
@@ -38,15 +38,15 @@ export function AdminUsersPage() {
 
   const canSubmit = useMemo(() => email.trim().length > 3 && roleIds.length > 0, [email, roleIds])
 
-  function toggleNumber(list: number[], value: number) {
+  const toggleNumber = (list: number[], value: number) => {
     return list.includes(value) ? list.filter((x) => x !== value) : [...list, value]
   }
 
-  function toggleString(list: string[], value: string) {
+  const toggleString = (list: string[], value: string) => {
     return list.includes(value) ? list.filter((x) => x !== value) : [...list, value]
   }
 
-  async function onSubmit(e: React.FormEvent) {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setCreated(null)
     await createMutation.mutateAsync({

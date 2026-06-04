@@ -7,7 +7,7 @@ export const MIN_PASSWORD_NOVELTY_RATIO = 0.5
 
 export type PasswordComplexityIssue = 'length' | 'upper' | 'lower' | 'digit' | 'special'
 
-export function getPasswordComplexityIssues(password: string): PasswordComplexityIssue[] {
+export const getPasswordComplexityIssues = (password: string): PasswordComplexityIssue[] => {
   const issues: PasswordComplexityIssue[] = []
 
   if (password.length < MIN_PASSWORD_LENGTH) {
@@ -33,7 +33,7 @@ export function getPasswordComplexityIssues(password: string): PasswordComplexit
   return issues
 }
 
-export function isPasswordComplexityOk(password: string): boolean {
+export const isPasswordComplexityOk = (password: string): boolean => {
   return getPasswordComplexityIssues(password).length === 0
 }
 
@@ -41,7 +41,7 @@ export function isPasswordComplexityOk(password: string): boolean {
  * Частка позицій (0–1), де символи відрізняються, з нормалізацією по max довжині.
  * Додаткові символи в довшому рядку вважаються відмінними від «відсутнього» в коротшому.
  */
-export function passwordNoveltyRatio(currentPassword: string, newPassword: string): number {
+export const passwordNoveltyRatio = (currentPassword: string, newPassword: string): number => {
   const L = Math.max(currentPassword.length, newPassword.length, 1)
   let diff = 0
 
@@ -54,11 +54,11 @@ export function passwordNoveltyRatio(currentPassword: string, newPassword: strin
   return diff / L
 }
 
-export function isPasswordNovelEnough(currentPassword: string, newPassword: string): boolean {
+export const isPasswordNovelEnough = (currentPassword: string, newPassword: string): boolean => {
   return passwordNoveltyRatio(currentPassword, newPassword) >= MIN_PASSWORD_NOVELTY_RATIO
 }
 
-export function complexityIssueLabel(issue: PasswordComplexityIssue): string {
+export const complexityIssueLabel = (issue: PasswordComplexityIssue): string => {
   switch (issue) {
     case 'length':
       return `щонайменше ${MIN_PASSWORD_LENGTH} символів`
@@ -74,7 +74,7 @@ export function complexityIssueLabel(issue: PasswordComplexityIssue): string {
 }
 
 /** Дата закінчення дії пароля (180 днів від останньої зміни), якщо відома дата зміни. */
-export function passwordValidUntil(changedAtIso: string): Date {
+export const passwordValidUntil = (changedAtIso: string): Date => {
   const changed = new Date(changedAtIso)
 
   if (Number.isNaN(changed.getTime())) {
@@ -88,10 +88,10 @@ export function passwordValidUntil(changedAtIso: string): Date {
   return until
 }
 
-export function isPasswordExpiredByMaxAge(
+export const isPasswordExpiredByMaxAge = (
   changedAtIso: string | null | undefined,
   now = new Date(),
-): boolean {
+): boolean => {
   if (changedAtIso == null || changedAtIso === '') {
     return false
   }

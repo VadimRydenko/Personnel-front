@@ -38,7 +38,7 @@ type UserEditPanelProps = {
   onInvalidateList: () => Promise<void>
 }
 
-function UserEditPanel(props: UserEditPanelProps) {
+const UserEditPanel = (props: UserEditPanelProps) => {
   const { user, rolesCatalog, onInvalidateList } = props
   const queryClient = useQueryClient()
 
@@ -47,11 +47,11 @@ function UserEditPanel(props: UserEditPanelProps) {
   const [blockReason, setBlockReason] = useState(user.blockReason ?? '')
   const [resetResult, setResetResult] = useState<string | null>(null)
 
-  function roleToggle(id: number) {
+  const roleToggle = (id: number) => {
     setRoleIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
   }
 
-  function rolesEqual(a: number[], b: AdminUserDetail['roles']) {
+  const rolesEqual = (a: number[], b: AdminUserDetail['roles']) => {
     const sortedA = [...a].sort((x, y) => x - y)
     const sortedB = b.map((r) => r.id).sort((x, y) => x - y)
 
@@ -174,7 +174,7 @@ function UserEditPanel(props: UserEditPanelProps) {
   )
 }
 
-export function AdminUserDirectoryPage() {
+export const AdminUserDirectoryPage = () => {
   const queryClient = useQueryClient()
   const me = useMe()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -213,7 +213,7 @@ export function AdminUserDirectoryPage() {
     [setSearchParams],
   )
 
-  function onSearch(e: React.FormEvent) {
+  const onSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setQ(qInput.trim())
     setPage(1)

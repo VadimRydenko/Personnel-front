@@ -62,7 +62,7 @@ const AVATAR_COLORS = [
   'bg-rose-800',
 ]
 
-export function getAvatarColor(name: string) {
+export const getAvatarColor = (name: string) => {
   let hash = 0
 
   for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) >>> 0
@@ -70,6 +70,6 @@ export function getAvatarColor(name: string) {
   return AVATAR_COLORS[hash % AVATAR_COLORS.length]
 }
 
-export function getInitials(lastName: string, firstName: string) {
+export const getInitials = (lastName: string, firstName: string) => {
   return (lastName[0] ?? '') + (firstName[0] ?? '')
 }

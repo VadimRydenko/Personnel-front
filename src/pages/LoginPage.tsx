@@ -15,7 +15,7 @@ import {
   Muted,
 } from '../components/ui'
 
-export function LoginPage() {
+export const LoginPage = () => {
   const navigate = useNavigate()
   const session = useSession()
 
@@ -26,7 +26,7 @@ export function LoginPage() {
 
   const canSubmit = useMemo(() => email.trim() && password, [email, password])
 
-  async function onSubmit(e: React.FormEvent) {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorText(null)
     setIsSubmitting(true)

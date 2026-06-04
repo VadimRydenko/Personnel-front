@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSession } from '../app/authClient'
 import { fetchMe, type MeResponse } from '../app/meApi'
 
-export function useMe() {
+export const useMe = () => {
   const session = useSession()
 
   return useQuery<MeResponse>({

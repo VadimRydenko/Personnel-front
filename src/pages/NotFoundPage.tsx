@@ -1,6 +1,6 @@
 import { Card, CardTitle, Muted, PageContent } from '../components/ui'
 
-export function NotFoundPage() {
+export const NotFoundPage = () => {
   return (
     <PageContent>
       <Card>

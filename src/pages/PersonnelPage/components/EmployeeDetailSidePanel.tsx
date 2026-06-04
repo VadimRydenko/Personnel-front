@@ -56,13 +56,13 @@ const TabPlaceholder = ({ title }: { title: string }) => (
   <Muted className="py-8 text-center">{title} (незабаром)</Muted>
 )
 
-export function EmployeeDetailSidePanel({
+export const EmployeeDetailSidePanel = ({
   person,
   onClose,
 }: {
   person: Person
   onClose: () => void
-}) {
+}) => {
   const [activeTab, setActiveTab] = useState<PanelTab>('card')
 
   const employeeCode = Number(person.id)

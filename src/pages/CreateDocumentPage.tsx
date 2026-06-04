@@ -28,7 +28,7 @@ const WIZARD_STEPS = [
   { id: 4, label: "Прев'ю" },
 ] as const
 
-function formatUkDate(date: Date) {
+const formatUkDate = (date: Date) => {
   const d = String(date.getDate()).padStart(2, '0')
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const y = date.getFullYear()
@@ -36,13 +36,13 @@ function formatUkDate(date: Date) {
   return `${d}.${m}.${y}`
 }
 
-function todayISO() {
+const todayISO = () => {
   const d = new Date()
 
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function CreateDocumentPage() {
+export const CreateDocumentPage = () => {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [personId, setPersonId] = useState('')

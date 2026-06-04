@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from './api'
+import { readJson } from './apiUtils'
 
 export type MeRole = {
   id: number
@@ -97,18 +98,6 @@ export type PatchAdminUserPayload = {
 
 export type ResetAdminUserPasswordResponse = {
   temporaryPassword: string
-}
-
-async function readJson(res: Response): Promise<unknown> {
-  const text = await res.text()
-
-  if (!text) return undefined
-
-  try {
-    return JSON.parse(text) as unknown
-  } catch {
-    return { text }
-  }
 }
 
 export async function fetchMe(): Promise<MeResponse> {

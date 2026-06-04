@@ -15,6 +15,7 @@ dist-ssr
 # Agent and Claude config
 .agents
 .claude
+CLAUDE.md
 
 # Editor directories and files
 .vscode/*

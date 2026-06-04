@@ -1,11 +1,11 @@
-export function getDisplayFirstName(name: string | null | undefined, email: string): string {
+export const getDisplayFirstName = (name: string | null | undefined, email: string): string => {
   const raw = (name?.trim() || email.split('@')[0] || '').trim()
   const first = raw.split(/\s+/)[0]
 
   return first || 'колега'
 }
 
-export function getInitials(name: string | null | undefined, email: string): string {
+export const getInitials = (name: string | null | undefined, email: string): string => {
   const raw = name?.trim() || email
   const parts = raw.split(/\s+/).filter(Boolean)
 

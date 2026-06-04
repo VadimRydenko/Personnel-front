@@ -3,7 +3,7 @@ import { getDisplayFirstName } from '../app/displayName'
 import { PageContent } from '../components/ui'
 import { useMe } from '../hooks/useMe'
 
-export function HomePage() {
+export const HomePage = () => {
   const session = useSession()
   const me = useMe()
   const user = session.data?.user

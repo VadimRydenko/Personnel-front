@@ -3,7 +3,7 @@ import { cn } from '../../../lib/cn'
 import { STATUS_BADGE, STATUS_DOT, STATUS_LABEL, getAvatarColor, getInitials } from '../constants'
 import type { Person } from '../types'
 
-export function PersonnelRow({
+export const PersonnelRow = ({
   person,
   isSelected,
   onSelect,
@@ -11,7 +11,7 @@ export function PersonnelRow({
   person: Person
   isSelected?: boolean
   onSelect?: (person: Person) => void
-}) {
+}) => {
   const avatarColor = getAvatarColor(person.fullName)
   const initials = getInitials(person.lastName, person.firstName)
 

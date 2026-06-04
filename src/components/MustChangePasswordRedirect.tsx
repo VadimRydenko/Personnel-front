@@ -7,7 +7,7 @@ type SessionUser = {
   mustChangePassword?: boolean | undefined
 }
 
-export function MustChangePasswordRedirect() {
+export const MustChangePasswordRedirect = () => {
   const session = useSession()
   const me = useMe()
   const location = useLocation()

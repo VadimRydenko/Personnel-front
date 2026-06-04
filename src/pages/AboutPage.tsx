@@ -1,6 +1,6 @@
 import { Card, CardTitle } from '../components/ui'
 
-export function AboutPage() {
+export const AboutPage = () => {
   return (
     <Card>
       <CardTitle>About</CardTitle>

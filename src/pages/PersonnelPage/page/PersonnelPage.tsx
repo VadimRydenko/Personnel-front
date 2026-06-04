@@ -12,7 +12,7 @@ import { FILTER_TABS, STAT_LABELS, STAT_ORDER, STATUS_DOT } from '../constants'
 import { useCreateEmployee } from '../state/useCreateEmployee'
 import type { Person, PersonStatus } from '../types'
 
-function employeeToPerson(e: Employee): Person {
+const employeeToPerson = (e: Employee): Person => {
   const fullName = [e.lastName, e.firstName, e.middleName].filter(Boolean).join(' ')
 
   return {
@@ -27,7 +27,7 @@ function employeeToPerson(e: Employee): Person {
   }
 }
 
-export function PersonnelPage() {
+export const PersonnelPage = () => {
   const [statusFilter, setStatusFilter] = useState<PersonStatus | null>(null)
   const [query, setQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')

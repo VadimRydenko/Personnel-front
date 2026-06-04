@@ -30,7 +30,7 @@ import {
 import { cn } from '../lib/cn'
 import { useMe } from '../hooks/useMe'
 
-export function ChangePasswordPage() {
+export const ChangePasswordPage = () => {
   const navigate = useNavigate()
   const session = useSession()
   const me = useMe()
@@ -84,7 +84,7 @@ export function ChangePasswordPage() {
     }
   }, [me.data?.passwordChangedAt])
 
-  async function onSubmit(e: React.FormEvent) {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorText(null)
 

@@ -5,7 +5,7 @@ import { GuestLayout } from './GuestLayout'
 import { MustChangePasswordRedirect } from './MustChangePasswordRedirect'
 import { Muted } from './ui'
 
-export function AuthRoot() {
+export const AuthRoot = () => {
   const session = useSession()
   const location = useLocation()
   const isLoginPath = location.pathname === '/login'

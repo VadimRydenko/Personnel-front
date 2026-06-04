@@ -1,18 +1,7 @@
 import { getApiBaseUrl } from './api'
+import { readJson } from './apiUtils'
 
-async function readJson(res: Response): Promise<unknown> {
-  const text = await res.text()
-
-  if (!text) return undefined
-
-  try {
-    return JSON.parse(text) as unknown
-  } catch {
-    return { text }
-  }
-}
-
-function getErrorMessage(body: unknown, status: number) {
+const getErrorMessage = (body: unknown, status: number) => {
   return typeof body === 'object' &&
     body !== null &&
     'message' in body &&
