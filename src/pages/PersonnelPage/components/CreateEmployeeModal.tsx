@@ -83,7 +83,7 @@ export const CreateEmployeeModal = ({ hook, onClose }: Props) => {
               <option value="">Оберіть...</option>
               {units.map((u) => (
                 <option key={u.code} value={String(u.code)}>
-                  {'  '.repeat(u.depth)}
+                  {'  '.repeat(u.depth)}
                   {u.name}
                 </option>
               ))}

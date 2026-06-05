@@ -13,7 +13,19 @@ const DetailRow = ({ label, value }: { label: string; value: React.ReactNode }) 
   </div>
 )
 
-export const DocumentPanel = ({ doc, onClose }: { doc: Document; onClose: () => void }) => {
+export const DocumentPanel = ({
+  doc,
+  onClose,
+  onSign,
+  isSigning,
+  signError,
+}: {
+  doc: Document
+  onClose: () => void
+  onSign: () => void
+  isSigning: boolean
+  signError: string | null
+}) => {
   const [tab, setTab] = useState<PanelTab>('details')
 
   return (
@@ -58,9 +70,11 @@ export const DocumentPanel = ({ doc, onClose }: { doc: Document; onClose: () => 
         <div className="flex flex-wrap gap-2 border-b border-border px-5 pb-4">
           <button
             type="button"
-            className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-transparent bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800"
+            disabled={doc.status === 'done' || isSigning}
+            onClick={onSign}
+            className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-transparent bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Підписати через КЕП
+            {isSigning ? 'Підписання…' : 'Підписати через КЕП'}
           </button>
           <button
             type="button"
@@ -74,6 +88,7 @@ export const DocumentPanel = ({ doc, onClose }: { doc: Document; onClose: () => 
           >
             PDF
           </button>
+          {signError && <p className="w-full m-0 text-xs text-rose-600">{signError}</p>}
         </div>
 
         <nav

@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { type DocStatus, fetchDocuments } from '../../app/documentsApi'
+import { type DocStatus, fetchDocuments, updateDocumentStatus } from '../../app/documentsApi'
+import { queryClient } from '../../app/queryClient'
 import { type Category, STATUS_LABEL } from './constants'
 import { startOfWeekMonday, toDateISO } from './utils'
 
@@ -99,6 +100,13 @@ export const useDocumentsPage = () => {
     [],
   )
 
+  const signMutation = useMutation({
+    mutationFn: (id: string) => updateDocumentStatus(id, 'done'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] })
+    },
+  })
+
   const togglePreset = (p: 'thisWeek' | 'vacationOrders') =>
     setPreset((prev) => (prev === p ? 'none' : p))
 
@@ -127,5 +135,6 @@ export const useDocumentsPage = () => {
     selectDoc,
     clearSelection,
     navigate,
+    signMutation,
   }
 }

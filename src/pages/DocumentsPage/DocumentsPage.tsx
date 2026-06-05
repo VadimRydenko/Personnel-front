@@ -54,6 +54,7 @@ export const DocumentsPage = () => {
     selectDoc,
     clearSelection,
     navigate,
+    signMutation,
   } = useDocumentsPage()
 
   return (
@@ -290,7 +291,15 @@ export const DocumentsPage = () => {
         </div>
       </div>
 
-      {selectedDoc && <DocumentPanel doc={selectedDoc} onClose={clearSelection} />}
+      {selectedDoc && (
+        <DocumentPanel
+          doc={selectedDoc}
+          onClose={clearSelection}
+          onSign={() => signMutation.mutate(selectedDoc.id)}
+          isSigning={signMutation.isPending}
+          signError={signMutation.error?.message ?? null}
+        />
+      )}
     </PageContent>
   )
 }

@@ -12,6 +12,7 @@ export type Document = {
   title: string
   status: DocStatus
   employeeCode: number
+  placeCode: number | null
   employeePlaceCode: number | null
   createdAt: string
   updatedAt: string
@@ -25,6 +26,7 @@ export type CreateDocumentPayload = {
   title: string
   status?: DocStatus
   employeeCode: number
+  placeCode?: number
   employeePlaceCode?: number
 }
 
@@ -85,6 +87,20 @@ export const createDocument = async (payload: CreateDocumentPayload): Promise<Do
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+  })
+  const body = await readJson(res)
+
+  if (!res.ok) throw new Error(getErrorMessage(body, res.status))
+
+  return body as Document
+}
+
+export const updateDocumentStatus = async (id: string, status: DocStatus): Promise<Document> => {
+  const res = await fetch(`${getApiBaseUrl()}/api/documents/${id}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
   })
   const body = await readJson(res)
 

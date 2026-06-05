@@ -79,6 +79,7 @@ export const useCreateDocumentPage = () => {
         title: `${selectedType?.label ?? 'Документ'}${selectedPerson ? ': ' + personFullName : ''}`,
         status: 'draft',
         employeeCode: selectedPerson!.code,
+        placeCode: placeCode ?? undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
