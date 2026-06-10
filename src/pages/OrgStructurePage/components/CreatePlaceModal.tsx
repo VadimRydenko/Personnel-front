@@ -56,14 +56,30 @@ export const CreatePlaceModal = (props: {
           }}
         >
           <Field>
-            <FieldLabel>Тип посади</FieldLabel>
+            <FieldLabel>Найменування посади</FieldLabel>
             <FieldSelect
               value={form.value.placeTypeCode}
               onChange={(e) => form.setField('placeTypeCode', e.target.value)}
               disabled={catalogQuery.isLoading || catalogQuery.isError}
             >
-              <option value="">Оберіть тип…</option>
+              <option value="">Оберіть найменування…</option>
               {(catalogQuery.data?.placeTypes ?? []).map((t) => (
+                <option key={t.code} value={String(t.code)}>
+                  {t.val}
+                </option>
+              ))}
+            </FieldSelect>
+          </Field>
+
+          <Field>
+            <FieldLabel>Категорія посади</FieldLabel>
+            <FieldSelect
+              value={form.value.posTypeCode}
+              onChange={(e) => form.setField('posTypeCode', e.target.value)}
+              disabled={catalogQuery.isLoading || catalogQuery.isError}
+            >
+              <option value="">Оберіть категорію…</option>
+              {(catalogQuery.data?.posTypes ?? []).map((t) => (
                 <option key={t.code} value={String(t.code)}>
                   {t.val}
                 </option>

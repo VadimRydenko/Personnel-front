@@ -4,6 +4,7 @@ import { getErrorMessage, readJson } from './apiUtils'
 export type UnitType = { code: number; val: string; valGenitive: string }
 
 export type PlaceType = { code: number; val: string }
+export type PosType = { code: number; val: string }
 
 export type PersonnelOrder = { code: number; orderNo: string; orderDate: string }
 
@@ -86,17 +87,19 @@ const parseOrgUnitsListBody = (body: unknown): OrgUnitTreeNode[] => {
 export async function fetchOrgCatalog(): Promise<{
   unitTypes: UnitType[]
   placeTypes: PlaceType[]
+  posTypes: PosType[]
 }> {
   const res = await fetch(`${getApiBaseUrl()}/api/org-units/catalog`, { credentials: 'include' })
   const body = await readJson(res)
 
   if (!res.ok) throw new Error(getErrorMessage(body, res.status))
 
-  const data = body as { unitTypes?: UnitType[]; placeTypes?: PlaceType[] }
+  const data = body as { unitTypes?: UnitType[]; placeTypes?: PlaceType[]; posTypes?: PosType[] }
 
   return {
     unitTypes: data.unitTypes ?? [],
     placeTypes: data.placeTypes ?? [],
+    posTypes: data.posTypes ?? [],
   }
 }
 
@@ -187,6 +190,7 @@ export async function createOrgUnit(payload: CreateOrgUnitPayload): Promise<OrgU
 
 export type CreatePlacePayload = {
   placeTypeCode: number
+  posTypeCode: number
   validFrom: string
   createOrder?: { orderNo: string; orderDate: string }
   createOrderCode?: number

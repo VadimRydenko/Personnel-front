@@ -9,8 +9,8 @@ export const useLoginPage = () => {
   const navigate = useNavigate()
   const session = useSession()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('admin@example.com')
+  const [password, setPassword] = useState('password')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorText, setErrorText] = useState<string | null>(null)
 

@@ -11,6 +11,7 @@ export type Document = {
   typeLabel: string
   title: string
   status: DocStatus
+  basis: string | null
   employeeCode: number
   placeCode: number | null
   employeePlaceCode: number | null
@@ -25,6 +26,7 @@ export type CreateDocumentPayload = {
   typeLabel: string
   title: string
   status?: DocStatus
+  basis?: string
   employeeCode: number
   placeCode?: number
   employeePlaceCode?: number

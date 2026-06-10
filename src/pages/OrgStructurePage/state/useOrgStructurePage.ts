@@ -12,6 +12,7 @@ import {
   type OrgPlace,
   type OrgUnit,
   type PlaceType,
+  type PosType,
   type UnitType,
 } from '../../../app/orgStructureApi'
 import { queryClient } from '../../../app/queryClient'
@@ -47,6 +48,7 @@ export type CreateOrgUnitFormState = {
 
 export type CreatePlaceFormState = {
   placeTypeCode: string
+  posTypeCode: string
   orderNo: string
   orderDate: string
   validFrom: string
@@ -54,6 +56,7 @@ export type CreatePlaceFormState = {
 
 const emptyCreatePlaceForm = (): CreatePlaceFormState => ({
   placeTypeCode: '',
+  posTypeCode: '',
   orderNo: '',
   orderDate: dateInputValue(new Date()),
   validFrom: dateInputValue(new Date()),
@@ -379,6 +382,7 @@ export const useOrgStructurePage = () => {
   const canSubmitCreatePlace = useMemo(() => {
     return Boolean(
       createPlaceForm.placeTypeCode &&
+      createPlaceForm.posTypeCode &&
       createPlaceForm.orderNo.trim() &&
       createPlaceForm.orderDate &&
       createPlaceForm.validFrom,
@@ -387,6 +391,7 @@ export const useOrgStructurePage = () => {
     createPlaceForm.orderDate,
     createPlaceForm.orderNo,
     createPlaceForm.placeTypeCode,
+    createPlaceForm.posTypeCode,
     createPlaceForm.validFrom,
   ])
 
@@ -412,6 +417,7 @@ export const useOrgStructurePage = () => {
       orgUnitCode: selectedCode,
       payload: {
         placeTypeCode: Number(createPlaceForm.placeTypeCode),
+        posTypeCode: Number(createPlaceForm.posTypeCode),
         validFrom: createPlaceForm.validFrom,
         createOrder: {
           orderNo: createPlaceForm.orderNo.trim(),
@@ -515,5 +521,5 @@ export const useOrgStructurePage = () => {
 
 export type OrgStructurePageState = ReturnType<typeof useOrgStructurePage>
 
-export type OrgCatalog = { unitTypes: UnitType[]; placeTypes: PlaceType[] }
+export type OrgCatalog = { unitTypes: UnitType[]; placeTypes: PlaceType[]; posTypes: PosType[] }
 export type OrgUnitSummary = OrgUnit

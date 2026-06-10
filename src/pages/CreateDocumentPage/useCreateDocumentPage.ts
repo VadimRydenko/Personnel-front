@@ -78,6 +78,7 @@ export const useCreateDocumentPage = () => {
         typeLabel: selectedType?.label ?? 'Документ',
         title: `${selectedType?.label ?? 'Документ'}${selectedPerson ? ': ' + personFullName : ''}`,
         status: 'draft',
+        basis: basis.trim() || undefined,
         employeeCode: selectedPerson!.code,
         placeCode: placeCode ?? undefined,
       }),
